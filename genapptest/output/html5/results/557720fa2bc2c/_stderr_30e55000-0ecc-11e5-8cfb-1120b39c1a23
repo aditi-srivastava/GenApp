@@ -1,0 +1,7 @@
+PHP Fatal error:  Uncaught exception 'Thrift\Exception\TException' with message 'TSocket: Could not connect to 127.0.0.1:8930 (Connection refused [111])' in /home/abhishek/Desktop/GenApp/abhishektest/output/html5/airavata/lib/Thrift/Transport/TSocket.php:235
+Stack trace:
+#0 /home/abhishek/Desktop/GenApp/abhishektest/output/html5/airavata/getAiravataClient.php(70): Thrift\Transport\TSocket->open()
+#1 /home/abhishek/Desktop/GenApp/abhishektest/output/html5/airavata.php(315): include('/home/abhishek/...')
+#2 /home/abhishek/Desktop/GenApp/abhishektest/output/html5/airavatarun(14): get_experiment_status('exp5_27bedf79-8...')
+#3 {main}
+  thrown in /home/abhishek/Desktop/GenApp/abhishektest/output/html5/airavata/lib/Thrift/Transport/TSocket.php on line 235

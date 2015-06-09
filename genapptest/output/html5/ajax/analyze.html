@@ -1,0 +1,45 @@
+<style>
+#panel_analyze {
+    position: relative;
+    display: block;  
+}
+</style>
+<p>
+<center>
+
+    <button id="analyze_analyze_1" class="help_link">Analyze 1</button><span class="help">help for Analyze_1</span>
+<script>
+    $( "#analyze_analyze_1" ).click(function() {
+        var d=$( "#tab_docs > a" );
+        if ( d.length ) { d.attr( "href", "__docsbaseurl__/analyze/analyze_1/analyze_1.html" ); };
+    
+        if ( ga.valuen.lastload && $( "#" + ga.valuen.lastload ).is( ":visible" ) ) { ga.valuen.save( ga.valuen.lastload ); }
+
+        if ( ga.valuen.lastload != "analyze_1" || !$( "#" + ga.valuen.lastload ).is( ":visible" ) ) {
+            $( "#panel_analyze" ).load( "ajax/analyze/analyze_1.html", function() { ga.valuen.save( "analyze_1", true ); ga.valuen.restore( "analyze_1" ); ga.valuen.lastload = "analyze_1"; });
+        }
+    });
+</script>
+    <button id="analyze_analyze_2" class="help_link">Analyze 2</button><span class="help">help for Analyze_2</span>
+<script>
+    $( "#analyze_analyze_2" ).click(function() {
+        var d=$( "#tab_docs > a" );
+        if ( d.length ) { d.attr( "href", "__docsbaseurl__/analyze/analyze_2/analyze_2.html" ); };
+    
+        if ( ga.valuen.lastload && $( "#" + ga.valuen.lastload ).is( ":visible" ) ) { ga.valuen.save( ga.valuen.lastload ); }
+
+        if ( ga.valuen.lastload != "analyze_2" || !$( "#" + ga.valuen.lastload ).is( ":visible" ) ) {
+            $( "#panel_analyze" ).load( "ajax/analyze/analyze_2.html", function() { ga.valuen.save( "analyze_2", true ); ga.valuen.restore( "analyze_2" ); ga.valuen.lastload = "analyze_2"; });
+        }
+    });
+</script>
+</center>
+</p>
+
+<div id="panel_analyze">
+</div>
+
+
+<script>
+    $( "#panel_analyze" ).text("");
+</script>

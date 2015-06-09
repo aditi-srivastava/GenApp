@@ -1,0 +1,13 @@
+{
+    "moduleid" : "test",
+    "label"    : "test",
+    "executable" : "test",
+    "submitpolicy" : "all",
+    "fields"   : [
+                  {
+                   "role"    : "input",
+                   "label"    : "submit to run",
+                   "type"    : "label"
+                   }
+    ]
+}

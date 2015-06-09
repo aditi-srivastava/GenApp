@@ -1,0 +1,7 @@
+PHP Fatal error:  Uncaught exception 'Thrift\Exception\TTransportException' with message 'TSocket: timed out reading 4 bytes from 127.0.0.1:8930' in /home/abhishek/Desktop/GenApp/abhishektest/output/html5/airavata/lib/Thrift/Transport/TSocket.php:274
+Stack trace:
+#0 /home/abhishek/Desktop/GenApp/abhishektest/output/html5/airavata/lib/Thrift/Transport/TTransport.php(74): Thrift\Transport\TSocket->read(4)
+#1 /home/abhishek/Desktop/GenApp/abhishektest/output/html5/airavata/lib/Thrift/Protocol/TBinaryProtocol.php(305): Thrift\Transport\TTransport->readAll(4)
+#2 /home/abhishek/Desktop/GenApp/abhishektest/output/html5/airavata/lib/Thrift/Protocol/TBinaryProtocol.php(197): Thrift\Protocol\TBinaryProtocol->readI32(NULL)
+#3 /home/abhishek/Desktop/GenApp/abhishektest/output/html5/airavata/lib/Airavata/API/Airavata.php(1367): Thrift\Protocol\TBinaryProtocol->readMessageBegin(NULL, 0, 0)
+#4 /home/abhishek/Desktop/GenApp/abhishektest/output/html5/airavata/lib/Airavata/API/Airavata.php(1335): Airavata\API\AiravataClient->recv_launchExperime in /home/abhishek/Desktop/GenApp/abhishektest/output/html5/airavata/lib/Thrift/Transport/TSocket.php on line 274
