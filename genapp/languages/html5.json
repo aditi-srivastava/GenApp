@@ -178,6 +178,23 @@
                                     ]
                    }
                    ,{
+                    "frequency"  : "once"
+                    ,"output"     : "airavata-0.15/modulesUtils.php"
+                    ,"inputs"     : [
+                                     { "airavata/registry/register_header.php" : "once" }
+                                     ,{ "airavata/registry/eachmodule.php" : "menu:modules:id" }
+                                     ,{ "airavata/registry/register_footer.php" : "once" }
+                                    ]
+                   }
+                   ,{
+                    "frequency"  : "once"
+                    ,"output"     : "airavatarun-0.15"
+                    ,"setexecutable" : "true"
+                    ,"inputs"     : [
+                                     { "airavata/airavatarun-0.15" : "once" }
+                                    ]
+                   }
+                   ,{
                     "frequency"  : "once",
                     "setexecutable" : "true",
                     "output"     : "ajax/sys_config/sys_jobmonitor.php",

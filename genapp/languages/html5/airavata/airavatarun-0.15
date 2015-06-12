@@ -1,0 +1,14 @@
+#!/usr/bin/env php
+<?php
+include("airavata-0.15.php");
+if ($argc == 3) {
+        $appId = $argv[1];
+        $json = $argv[2];
+        $projId=createProject("test");
+		$expId=createExperiment("exp5", $projId, $appId, $json); 
+		$res = launchExperiment($expId);
+		echo getOutput($expId); 
+    } else {
+       echo  "{\"error\":\"insufficient arguments\"}";
+	}
+?>

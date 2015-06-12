@@ -583,8 +583,8 @@ __~debug:basemylog{    error_log( "request ready to jsonize\n" . print_r( $_REQU
          exit();
       }
       ob_end_clean();
-      if($cmdprefix == "airavatarun"){ 
-         $cmd = "$adir/airavatarun";
+      if(strpos($cmdprefix, "airavatarun") >= 0){ 
+         $cmd = "$adir/$cmdprefix";
          $cmd .= " __menu:modules:id__";
          $cmd .= " '$json'"; 
       }else{
