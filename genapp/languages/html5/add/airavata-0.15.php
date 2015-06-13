@@ -1,6 +1,6 @@
 <?php
 
-$GLOBALS['THRIFT_ROOT'] = 'airavataNew/lib/Thrift/';
+$GLOBALS['THRIFT_ROOT'] = 'airavata-0.15/lib/Thrift/';
 require_once $GLOBALS['THRIFT_ROOT'] . 'Transport/TTransport.php';
 require_once $GLOBALS['THRIFT_ROOT'] . 'Transport/TBufferedTransport.php';
 require_once $GLOBALS['THRIFT_ROOT'] . 'Transport/TSocket.php';
@@ -17,14 +17,14 @@ require_once $GLOBALS['THRIFT_ROOT'] . 'Factory/TStringFuncFactory.php';
 require_once $GLOBALS['THRIFT_ROOT'] . 'StringFunc/TStringFunc.php';
 require_once $GLOBALS['THRIFT_ROOT'] . 'StringFunc/Core.php';
 
-$GLOBALS['AIRAVATA_ROOT'] = 'airavataNew/lib/Airavata/';
+$GLOBALS['AIRAVATA_ROOT'] = 'airavata-0.15/lib/Airavata/';
 require_once $GLOBALS['AIRAVATA_ROOT'] . 'API/Airavata.php';
 require_once $GLOBALS['AIRAVATA_ROOT'] . 'Model/AppCatalog/AppInterface/Types.php';
 require_once $GLOBALS['AIRAVATA_ROOT'] . 'Model/Workspace/Types.php';
 require_once $GLOBALS['AIRAVATA_ROOT'] . 'Model/Workspace/Experiment/Types.php';
 require_once $GLOBALS['AIRAVATA_ROOT'] . 'API/Error/Types.php';
 
-require_once 'airavataNew/lib/AiravataClientFactory.php';
+require_once 'airavata-0.15/lib/AiravataClientFactory.php';
 
 use Airavata\API\Error\AiravataClientException;
 use Airavata\API\Error\AiravataSystemException;
@@ -49,7 +49,7 @@ use Airavata\Model\AppCatalog\AppInterface\DataType;
 
 
 function createProject($projectName){
-    $airavataconfig = parse_ini_file("airavataNew/airavata-client-properties.ini");
+    $airavataconfig = parse_ini_file("airavata-0.15/airavata-client-properties.ini");
     $transport = new TSocket($airavataconfig['AIRAVATA_SERVER'], $airavataconfig['AIRAVATA_PORT']);
     $transport->setRecvTimeout($airavataconfig['AIRAVATA_TIMEOUT']);
     $transport->setSendTimeout($airavataconfig['AIRAVATA_TIMEOUT']);
@@ -102,7 +102,7 @@ function createProject($projectName){
 }
 
 function createExperiment($expName, $projId, $appId, $inp){
-    $airavataconfig = parse_ini_file("airavataNew/airavata-client-properties.ini");
+    $airavataconfig = parse_ini_file("airavata-0.15/airavata-client-properties.ini");
     $transport = new TSocket($airavataconfig['AIRAVATA_SERVER'], $airavataconfig['AIRAVATA_PORT']);
     $transport->setSendTimeout($airavataconfig['AIRAVATA_TIMEOUT']);
     $protocol = new TBinaryProtocol($transport);
@@ -201,7 +201,7 @@ function createExperiment($expName, $projId, $appId, $inp){
 }
 
 function launchExperiment( $expId){
-    $airavataconfig = parse_ini_file("airavataNew/airavata-client-properties.ini");
+    $airavataconfig = parse_ini_file("airavata-0.15/airavata-client-properties.ini");
     $token = $airavataconfig['AIRAVATA_CREDENTIAL_STORE_TOKEN'];
     $transport = new TSocket($airavataconfig['AIRAVATA_SERVER'], $airavataconfig['AIRAVATA_PORT']);
     $transport->setSendTimeout($airavataconfig['AIRAVATA_TIMEOUT']);

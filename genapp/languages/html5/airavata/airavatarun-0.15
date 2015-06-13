@@ -14,22 +14,26 @@ if ($argc == 3) {
                 $launch = json_decode($launch);
                 if(isset($launch->isExperimentLaunched)){
                     $results = getOutput($expId->ExperimentId);
-                    $results = json_decode($results);    
+                    $results = json_decode($results);   
                     if(isset($results->output)){
                         echo $results->output;
                     }else{
                         echo $results->error;
                     }
                 }else{
-                       echo  "{\"error\":\"".$launch->error."\"}";
+                    error_log("{\"error\":\"".$launch->error."\"}");
+                    echo  "{\"error\":\"".$launch->error."\"}";
                 }
             }else{
-                   echo  "{\"error\":\"".$expId->error."\"}";
+                error_log("{\"error\":\"".$expId->error."\"}");
+                echo  "{\"error\":\"".$expId->error."\"}";
             }
         }else{
-            echo  "{\"error\":\"".$projId->error."\"}";
+            error_log("{\"error\":\"".$projId->error."\"}\n");
+            echo "{\"error\":\"".$projId->error."\"}\n";
         }
     } else {
-       echo  "{\"error\":\"insufficient arguments\"}";
+       error_log("{\"error\":\"insufficient arguments\"}");
+       echo "{\"error\":\"insufficient arguments\"}";
     }
 ?>
