@@ -75,14 +75,14 @@ function register(){
         registerGateWayProfile($airavataclient, $hostId);
         // echo var_dump($resourceprofile);
         }else{
-          $cmrf = $airavataclient
+          if(isGatewayRegistered($airavataclient, $gatewayId)){
+                $cmrf = $airavataclient
                             ->getGatewayResourceProfile($gatewayId)
                             ->computeResourcePreferences;
-          if(empty($cmrf)){
-                $hostId = registerHost($airavataclient, $airavataconfig['AIRAVATA_SERVER']);
-                registerGateWayProfile($airavataclient, $hostId);
+               $hostId = $cmrf[0]->computeResourceId;
           }else{
-              $hostId = $cmrf[0]->computeResourceId;
+            $hostId = registerHost($airavataclient, $airavataconfig['AIRAVATA_SERVER']);
+            registerGateWayProfile($airavataclient, $hostId);
           }
         }
        $registeredModules = getRegisteredModules($airavataclient, $gatewayId);
@@ -112,6 +112,16 @@ function register(){
 	$transport->close();
 }
 
+function isGatewayRegistered($client, $gatewayId){
+   $gCRs = $client->getAllGatewayComputeResources();
+   $exist = false;
+   foreach ($gCRs as $gCr) {
+       if($gCr->gatewayId === $gatewayId){
+            $exist = true;
+       }
+   }
+   return $exist;
+}
 
 function registerGateWayProfile($client, $hostId){
    $airavataconfig = parse_ini_file("airavata-client-properties.ini");
@@ -130,13 +140,13 @@ function registerGateWayProfile($client, $hostId){
    $client->registerGatewayResourceProfile($gatewayProfile);
 }
 
-function getRegisteredModules($client, $gatewayID){
+function getRegisteredModules($client, $gatewayId){
  //    $registeredModules = array();    
 	// $allDeployed = $client->getAllApplicationDeployments();
 	// 	foreach ($allDeployed as $module) {
 	//   		$registeredModules[$client->getApplicationModule($module->appModuleId)->appModuleName] = $module->executablePath;
 	// 	}
-	return $client->getAllApplicationInterfaceNames($gatewayID);    
+	return $client->getAllApplicationInterfaceNames($gatewayId);    
 }
 
 function getUnregisteredModules($registeredModules){
