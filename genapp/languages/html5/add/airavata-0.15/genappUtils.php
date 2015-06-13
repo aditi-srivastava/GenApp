@@ -39,6 +39,7 @@ use Thrift\Transport\TSocket;
 use Airavata\API\AiravataClient;
 use Thrift\Exception\TTransportException;
 use Thrift\Exception\TProtocolException;
+use Thrift\Exception\TException;
 use Airavata\Model\AppCatalog\ComputeResource\ComputeResourceDescription;
 use Airavata\Model\AppCatalog\ComputeResource\ResourceJobManager;
 use Airavata\Model\AppCatalog\ComputeResource\ResourceJobManagertype;
@@ -56,14 +57,14 @@ use Airavata\Model\Workspace\Gateway;
 
 #airavata functions
 function register(){    
-    $airavataconfig = parse_ini_file("airavata-client-properties.ini");
-    $gatewayId = $airavataconfig['AIRAVATA_GATEWAY'];
-	$transport = new TSocket($airavataconfig['AIRAVATA_SERVER'], $airavataconfig['AIRAVATA_PORT']);
-	$transport->setSendTimeout($airavataconfig['AIRAVATA_TIMEOUT']);
-	$protocol = new TBinaryProtocol($transport);
-	$transport->open();
-	try{
-		$airavataclient = new AiravataClient($protocol);
+  $airavataconfig = parse_ini_file("airavata-client-properties.ini");
+  $gatewayId = $airavataconfig['AIRAVATA_GATEWAY'];
+  $transport = new TSocket($airavataconfig['AIRAVATA_SERVER'], $airavataconfig['AIRAVATA_PORT']);
+  $transport->setSendTimeout($airavataconfig['AIRAVATA_TIMEOUT']);
+  $protocol = new TBinaryProtocol($transport);
+  try{
+        $transport->open();
+        $airavataclient = new AiravataClient($protocol);
         if(!$airavataclient->isGatewayExist($gatewayId)){
         $gateway = new Gateway();
         $gateway->gatewayId = $gatewayId;
@@ -92,31 +93,36 @@ function register(){
            $moduleids = registerApplicationModule($gatewayId, $airavataclient, $modules);
            registerApplicationDeployments($gatewayId, $airavataclient, $moduleids, $modules, $hostId);
            registerApplicationInterfaces($gatewayId, $airavataclient, $moduleids, $modules, $hostId);
-		}
-	}	
-	catch (InvalidRequestException $ire)
-	{
-	    print 'InvalidRequestException: ' . $ire->getMessage()."\n";
-	}
-	catch (AiravataClientException $ace)
-	{
-	    print 'Airavata System Exception: ' . $ace->getMessage()."\n";
-	}
-	catch (AiravataSystemException $ase)
-	{
-	    print 'Airavata System Exception: ' . $ase->getMessage()."\n";
-	}catch (TProtocolException $tpee)
-    {
-        print 'Airavata gatewaid not found: ' . $ase->getMessage()."\n";
     }
-	$transport->close();
+       $transport->close();
+  } 
+    catch (InvalidRequestException $ire)
+    {
+        echo 'InvalidRequestException: ' . $ire->getMessage();
+    }
+    catch (AiravataClientException $ace)
+    {
+        echo 'Airavata System Exception: ' . $ace->getMessage();
+    }
+    catch (AiravataSystemException $ase)
+    {
+        echo 'Airavata System Exception: ' . $ase->getMessage();
+    }
+    catch(TException $tx)
+    {
+        echo 'There is some connection problem, please check if airavata is runnig properly and try again later';
+    }
+    catch (\Exception $e)
+    {
+        echo 'Exception: ' . $e->getMessage();
+    }
 }
 
 function isGatewayRegistered($client, $gatewayId){
    $gCRs = $client->getAllGatewayComputeResources();
    $exist = false;
    foreach ($gCRs as $gCr) {
-       if($gCr->gatewayId === $gatewayId){
+       if($gCr->gatewayID === $gatewayId){
             $exist = true;
        }
    }
@@ -142,33 +148,33 @@ function registerGateWayProfile($client, $hostId){
 
 function getRegisteredModules($client, $gatewayId){
  //    $registeredModules = array();    
-	// $allDeployed = $client->getAllApplicationDeployments();
-	// 	foreach ($allDeployed as $module) {
-	//   		$registeredModules[$client->getApplicationModule($module->appModuleId)->appModuleName] = $module->executablePath;
-	// 	}
-	return $client->getAllApplicationInterfaceNames($gatewayId);    
+  // $allDeployed = $client->getAllApplicationDeployments();
+  //  foreach ($allDeployed as $module) {
+  //      $registeredModules[$client->getApplicationModule($module->appModuleId)->appModuleName] = $module->executablePath;
+  //  }
+  return $client->getAllApplicationInterfaceNames($gatewayId);    
 }
 
 function getUnregisteredModules($registeredModules){
-	$unregisteredModules = array();
-	$exec_path = getExecutablePath();
-	$modules = getModulesNames();
-	foreach ($modules as $id) {
-		if(isset($registeredModules[$id])){
-			if(strcmp($registeredModules[$id], $id) == 0){
+  $unregisteredModules = array();
+  $exec_path = getExecutablePath();
+  $modules = getModulesNames();
+  foreach ($modules as $id) {
+    if(isset($registeredModules[$id])){
+      if(strcmp($registeredModules[$id], $id) == 0){
                 echo $id." is already registered \n";
-			}else {
-				$unregisteredModules[] = $id;
-			}
-		}else{
-			$unregisteredModules[] = $id;
-		}
-	}
-	return $unregisteredModules;
+      }else {
+        $unregisteredModules[] = $id;
+      }
+    }else{
+      $unregisteredModules[] = $id;
+    }
+  }
+  return $unregisteredModules;
 }
 
 function registerHost($client, $host){
-	echo "## Registering for host ##\n";
+  echo "## Registering for host ##\n";
     $resourceDesc = createComputeResourceDescription($host, "Host for GenApp", null, null);
     $hostId = $client->registerComputeResource($resourceDesc);
     $resourceJobManager = createResourceJobManager(ResourceJobManagerType::FORK, null, null, null);
@@ -190,7 +196,7 @@ function createComputeResourceDescription($hostName, $hostDesc, $hostAliases, $i
     }
 
 function createResourceJobManager($resourceJobManagerType, $pushMonitoringEndpoint,
-					$jobManagerBinPath, $jobManagerCommands) {
+          $jobManagerBinPath, $jobManagerCommands) {
         $resourceJobManager = new ResourceJobManager();
         $resourceJobManager->resourceJobManagerType = $resourceJobManagerType;
         $resourceJobManager->pushMonitoringEndpoint = $pushMonitoringEndpoint;
@@ -200,12 +206,12 @@ function createResourceJobManager($resourceJobManagerType, $pushMonitoringEndpoi
     }
 
 function registerApplicationModule($gatewayId, $client, $modules){
-	$moduleids = array();
-	foreach($modules as $module){
+  $moduleids = array();
+  foreach($modules as $module){
         $moduleids[$module] = $client->registerApplicationModule($gatewayId,
-        	createApplicationModule($module, "1.0", $module." discription"));
-	}
-	return $moduleids;
+          createApplicationModule($module, "1.0", $module." discription"));
+  }
+  return $moduleids;
 }
 
 function createApplicationModule($appModuleName, $appModuleVersion, $appModuleDescription) {
@@ -228,7 +234,7 @@ function registerApplicationDeployments($gatewayId, $client, $moduleIds, $module
 }
 
 function createApplicationDeployment($appModuleId, $computeResourceId, $executablePath,
-           										$parallelism, $appDeploymentDescription) {
+                              $parallelism, $appDeploymentDescription) {
         $deployment = new ApplicationDeploymentDescription();
 //      deployment.setIsEmpty(false);
         $deployment->appDeploymentDescription = $appDeploymentDescription;
@@ -252,7 +258,7 @@ function registerApplicationInterfaces($gatewayId, $client, $moduleIds, $moduleN
         $applicationInputs[] = $input;
 
         $output = createAppOutput("JSON_Output","{}", DataType::STRING);
-		$applicationOutputs = array();
+    $applicationOutputs = array();
         $applicationOutputs[] = $output;
 
         $InterfaceId = $client->registerApplicationInterface($gatewayId, 
@@ -285,19 +291,19 @@ function createAppOutput($inputName, $value, $type) {
 }
 
 function createApplicationInterfaceDescription($applicationName, $applicationDescription, 
-	                                $applicationModules, $applicationInputs, $applicationOutputs) {
+                                  $applicationModules, $applicationInputs, $applicationOutputs) {
         $applicationInterfaceDescription = new ApplicationInterfaceDescription();
 
         $applicationInterfaceDescription->applicationName = $applicationName;
         $applicationInterfaceDescription->applicationInterfaceId = $applicationName;
         if (isset($applicationDescription)) 
-        	$applicationInterfaceDescription->applicationDescription = $applicationDescription;
+          $applicationInterfaceDescription->applicationDescription = $applicationDescription;
         if (isset($applicationModules)) 
-        	$applicationInterfaceDescription->applicationModules = $applicationModules;
+          $applicationInterfaceDescription->applicationModules = $applicationModules;
         if (isset($applicationInputs)) 
-        	$applicationInterfaceDescription->applicationInputs = $applicationInputs;
+          $applicationInterfaceDescription->applicationInputs = $applicationInputs;
         if (isset($applicationOutputs)) 
-        	$applicationInterfaceDescription->applicationOutputs = $applicationOutputs;
+          $applicationInterfaceDescription->applicationOutputs = $applicationOutputs;
 
         return $applicationInterfaceDescription;
     }
