@@ -1,0 +1,11 @@
+__moduleid__.add(new HashMap<String, String>(){{
+            put("role", "__fields:role__");
+            put("id", "__fields:id__");
+            put("label", "__fields:label__");
+            put("type", "__fields:type__");
+            put("default", "__fields:default__");
+            put("min", "__fields:min__");
+            put("max", "__fields:max__");
+            put("required", "__fields:required__");
+            }
+});

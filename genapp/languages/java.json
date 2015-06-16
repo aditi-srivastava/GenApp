@@ -1,0 +1,53 @@
+# this is a language file, any language specific data should go here
+{
+  "id"          : "java",
+  "description" : "Java GenApp",
+  "version"     : 1,
+  "assembly"    : [
+                   {
+                    "frequency"  : "once",
+                    "output"     : "css/main.css",
+                    "inputs"     : [ 
+                                     { "css/main.css" : "once" }
+                                   ]
+                   }
+                   ,{
+                    "frequency"  : "once",
+                    "output"     : "__application__.java",
+                    "inputs"     : [ 
+                                     { "imports.java" : "menu:modules:id" }
+                                     ,{ "Genapp.java" : "once" }
+                                     ,{ "AddCaseModules.java" : "menu:modules:id" }
+                                     ,{ "Footer.java" : "once" }
+                                   ]
+                   }
+                   ,{
+                    "frequency"  : "once",
+                    "output"     : "items/MenuItemIcon.java",
+                    "inputs"     : [ 
+                                     { "items/MenuItemIcon.java" : "once" }
+                                   ]
+                   }
+                  ,{
+                    "frequency"  : "menu:modules:id",
+                    "output"     : "modules/__menu:modules:id__.java",
+                    "inputs"     : [ 
+                                     { "modules/module.java" : "once" }
+                                   ]
+                   }
+                   ,{
+                    "frequency"  : "once",
+                    "output"     : "data/ModulesData.java",
+                    "inputs"     : [ 
+                                     { "data/header.java" : "once" }
+                                     ,{"data/modules_intialize.java": "menu:modules:id"}
+                                     ,{"data/header2.java": "once"}
+                                     ,{"data/putMenuIds.java": "menu:id"}
+                                     ,{"data/putMenuIdModules.java": "menu:modules:id"}
+                                     ,{"types/__fields:type__.__fields:role__"  : "fields:id"}
+                                     ,{"data/footer.java": "once"}
+                                   ]
+                   }
+       ]
+}
+
