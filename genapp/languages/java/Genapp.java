@@ -1,10 +1,8 @@
 import java.util.List;
-
 import data.ModulesData;
 import states.ApplicationStates;
 import items.MenuBox;
 import items.MenuItemIcon;
-
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -12,6 +10,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
@@ -23,6 +22,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 public class __application__ extends Application implements EventHandler<MouseEvent>{
@@ -39,20 +39,25 @@ public class __application__ extends Application implements EventHandler<MouseEv
     
     @Override
     public void start(Stage stage) {
+        ScrollPane main = new ScrollPane();
+        main.getStyleClass().add("scrollpane");
         BorderPane border = new BorderPane();
+        main.setContent(border);
         border.setTop(getHeader());
         border.setLeft(getMenuBox());
         border.setCenter(getContent());
         border.setBottom(getFooter());
+        border.setPrefSize(Screen.getPrimary().getVisualBounds().getWidth()-20,
+                            Screen.getPrimary().getVisualBounds().getHeight()-20);
 
         border.getStyleClass().add("main");
-        scene = new Scene(border);      
+        scene = new Scene(main);      
         scene.getStylesheets().add(__application__.class.getResource("css/main.css").toExternalForm());
         setTooltips();
         stage.setMaximized(true);
         stage.setScene(scene);
         stage.setTitle("__application__");
-        stage.getIcons().add(new Image(__application__.class.getResource("pngs/tools.png").toExternalForm()));
+        stage.getIcons().add(new Image(__application__.class.getResource("favicon.ico").toExternalForm()));
         stage.show();
     }
 

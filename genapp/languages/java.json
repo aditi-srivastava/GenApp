@@ -13,6 +13,22 @@
                    }
                    ,{
                     "frequency"  : "once",
+                    "output"     : "compile___application__",
+                    "setexecutable" : "true",
+                    "inputs"     : [ 
+                                     { "compile.sh" : "once" }
+                                   ]
+                   }    
+                   ,{
+                    "frequency"  : "once",
+                    "output"     : "run___application__",
+                    "setexecutable" : "true",
+                    "inputs"     : [ 
+                                     { "run.sh" : "once" }
+                                   ]
+                   }                    
+                   ,{
+                    "frequency"  : "once",
                     "output"     : "__application__.java",
                     "inputs"     : [ 
                                      { "imports.java" : "menu:modules:id" }
@@ -35,17 +51,33 @@
                                      { "modules/module.java" : "once" }
                                    ]
                    }
-                   ,{
+                   
+
+                                      ,{
                     "frequency"  : "once",
                     "output"     : "data/ModulesData.java",
                     "inputs"     : [ 
                                      { "data/header.java" : "once" }
-                                     ,{"data/modules_intialize.java": "menu:modules:id"}
-                                     ,{"data/header2.java": "once"}
                                      ,{"data/putMenuIds.java": "menu:id"}
                                      ,{"data/putMenuIdModules.java": "menu:modules:id"}
-                                     ,{"types/__fields:type__.__fields:role__"  : "fields:id"}
                                      ,{"data/footer.java": "once"}
+                                   ]
+                   }
+                   ,{
+                    "frequency"  : "menu:modules:id",
+                    "output"     : "data/__menu:modules:id___data.java",
+                    "inputs"     : [ 
+                                     { "data/module_header.java" : "once" }
+                                     ,{"types/__fields:type__.input"  : "fields:id"}
+                                     ,{"types/__fields:type__.output"  : "fields:id"}
+                                     ,{"data/footer.java": "once"}
+                                   ]
+                   }
+                   ,{
+                    "frequency"  : "once",
+                    "output"     : "util/HandleResult.java",
+                    "inputs"     : [ 
+                                     {"HandleResult.java": "once"}
                                    ]
                    }
        ]

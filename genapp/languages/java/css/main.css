@@ -101,7 +101,7 @@
 .button{
     -fx-background-color: rgb(__button_color_rgb__);
     -fx-border-radius:5px;
-    -fx-text-fill:rgb(__button_g_color_rgb__);
+    -fx-text-fill:rgb(0,0,0);
     -fx-cursor:hand;
 }
 
@@ -133,5 +133,18 @@
   -fx-text-fill:rgb(__text_color_rgb__);
 }
 
+.label{
+   /*-fx-font-size: 2em;*/
+   -fx-fill: rgb(__text_color_rgb__);
+   -fx-font-weight: bold;
+}
 
+.error{
+   -fx-fill: rgb(__error_color_rgb__);
+   -fx-font-weight: bold;
+}
 
+.scrollpane{
+ -fx-background:rgb(__background_color_rgb__);
+ -fx-border-color:rgb(__background_color_rgb__);
+}
