@@ -1,5 +1,5 @@
 <?php 
-require_once("genappUtils.php");
+require_once("registerUtils.php");
 
 register();
 
