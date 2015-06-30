@@ -18,6 +18,7 @@ import javafx.scene.text.Text;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+
 import output.Output;
 
 
@@ -30,22 +31,18 @@ public class HandleResult {
         return uniqid ;
     }
     
-    public static void createDirectory(String location){
+    public static void createDirectory(String location) throws SecurityException{
          File theDir = new File(location);
          boolean test=true;
          if (!theDir.exists()) {
              System.out.println("creating directory: "+location);
              boolean result = false;
     
-             try{
                  test = theDir.mkdirs();
                  theDir.setReadable(true);
                  theDir.setWritable(true);
                  theDir.setExecutable(true);
-                 result = true;
-             } 
-             catch(SecurityException se){
-             }        
+                 result = true;       
              if(result) {    
                  
                     System.out.println(test);
@@ -57,11 +54,7 @@ public class HandleResult {
         
     }
     
-    public static void wrtieFile(String content, String fileName){
-        try {
-            
-            
- 
+    public static void wrtieFile(String content, String fileName) throws IOException{
             File file = new File(fileName);
  
             if (!file.exists()) {
@@ -73,9 +66,6 @@ public class HandleResult {
             bw.write(content);
             bw.close();
  
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
     
     public static HashMap<String, String> getAppConfig(){
@@ -96,10 +86,15 @@ public class HandleResult {
         JSONObject json = new JSONObject();
         Iterator<Node> inputIt = input.getChildren().iterator();
         while(inputIt.hasNext()){
-            HBox inp = (HBox) inputIt.next();
+            Node node = inputIt.next();
+            if(node instanceof HBox){
+            HBox inp = (HBox) node;
+            if(inp.getChildren().size() > 1){
             Node nd = inp.getChildren().get(1);
             if(nd.getId() != "reset" && nd.getId() != "submit")
             json.put(nd.getId(), Input.getInput(nd));
+            }
+          }
             
         }
         return json;
@@ -141,20 +136,21 @@ public class HandleResult {
 
     }
     
-    public static JSONObject prepareToRun(String id,String executable, VBox inputBox){
+    public static JSONObject prepareToRun(String id,String executable, VBox inputBox) throws IOException, SecurityException{
         JSONObject json = new JSONObject();
         String uuid = HandleResult.uniqid(id);
         String base_dir = "__docroot:java__/abhishektest_java/"+uuid;
         JSONObject args = getInputJSON(inputBox);
         createDirectory(base_dir);
-        String cmds = executable+" '"+args+"' 2> "+base_dir+"/_stderr_"+uuid+" | head -c50000000";
         args.put("_uuid", uuid);
         args.put("_base_directory", base_dir);
         args.put("_log_directory", base_dir);
         args.put("resourcedefault", "");
+        String cmds = executable+" '"+args+"' 2> "+base_dir+"/_stderr_"+uuid+" | head -c50000000";
         json.put("uuid", uuid);
         json.put("base_dir", base_dir);
         json.put("cmds", cmds);
+        
         HandleResult.wrtieFile(json+"", base_dir+"/_args_"+uuid);
         HandleResult.wrtieFile(json+"", base_dir+"/_inputs_"+uuid);
         HandleResult.wrtieFile(cmds, base_dir+"/_cmds_"+uuid);

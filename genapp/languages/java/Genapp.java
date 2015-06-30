@@ -1,3 +1,4 @@
+import java.util.HashMap;
 import java.util.List;
 import data.ModulesData;
 import states.ApplicationStates;
@@ -31,9 +32,11 @@ public class __application__ extends Application implements EventHandler<MouseEv
     private static ApplicationStates appState;
     private HBox menuButton;
     private VBox content;
+    private static HashMap<String, VBox> modules;
     
     public static void main(String[] args) {
         appState = new ApplicationStates();
+        modules = new HashMap<String, VBox>();
         launch(__application__.class, args);
     }
     

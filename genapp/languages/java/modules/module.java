@@ -1,23 +1,23 @@
 package modules;
 
-import java.util.HashMap;
-import java.util.Iterator;
-
-import output.Output;
-import util.HandleResult;
-import util.JobRun;
-
 import data.__menu:modules:id___data;
 
+import util.JobRun;
 import input.Input;
-import org.json.simple.JSONObject;
-import javafx.event.EventHandler;
+import output.Output;
+import java.util.HashMap;
+import util.HandleResult;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.input.MouseEvent;
+import java.util.Iterator;
+import java.io.IOException;
+import javafx.scene.text.Text;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
+import javafx.event.EventHandler;
+import org.json.simple.JSONObject;
+import javafx.scene.control.Button;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.control.ProgressBar;
 
 public class __menu:modules:id__ extends VBox implements EventHandler<MouseEvent>{
     private VBox inputBox, outputBox;
@@ -44,6 +44,11 @@ public class __menu:modules:id__ extends VBox implements EventHandler<MouseEvent
             btIt.next().setOnMouseClicked(this);
         }
         inputs.getChildren().add(bt);
+        ProgressBar pbar = new ProgressBar();
+        pbar.setProgress(-1);
+        pbar.setId("progress");
+        pbar.setVisible(false);
+        inputs.getChildren().add(pbar);
         return inputs;
     }
     
@@ -68,16 +73,21 @@ public class __menu:modules:id__ extends VBox implements EventHandler<MouseEvent
         Button bt = (Button) event.getSource();
         switch(bt.getId()){
         case "submit":
-            JSONObject data = HandleResult.prepareToRun("__menu:modules:id___","__executable_path:java__/__menu:modules:id__",inputBox);
-            String[] cmd = new String[]{
-                    "/bin/sh",
-                    "-c",
-                    data.get("cmds")+"",
-            };
-            
-            JobRun jb = new JobRun(cmd,data, outputBox);
-            Thread jobThread = new Thread(jb);
-            jobThread.start();
+            JSONObject data;
+            ProgressBar pb = (ProgressBar) inputBox.lookup("#progress");
+            pb.setVisible(true);
+            try {
+                data = HandleResult.prepareToRun("__menu:modules:id___","__executable_path:java__/__menu:modules:id__",inputBox);
+                JobRun jb = new JobRun(data, outputBox, inputBox);
+                Thread jobThread = new Thread(jb);
+                jobThread.start();
+            } catch (IOException e) {
+                pb.setVisible(false);
+                e.printStackTrace();
+            }catch(SecurityException e){
+                pb.setVisible(false);
+                e.printStackTrace();
+            }
             break;
         case "reset":
             break;
