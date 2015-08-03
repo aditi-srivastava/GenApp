@@ -1,10 +1,17 @@
 package input;
 
+import java.awt.Desktop;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Set;
 
+import util.Help;
+
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -16,6 +23,8 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 public class Input {
     public static HBox getSubmitButton(){
@@ -37,7 +46,8 @@ public class Input {
             return str.matches("-?\\d+");    
         }
         else if(type.equals("float")){
-            return str.matches("-?\\d+(\\.\\d+)?"); 
+             return str.matches("^[-]?((0|[1-9][0-9]*)(\\.[0-9]+)?|\\.[0-9]+)([eE][+-]?[0-9]+)?$");
+//            return str.matches("-?\\d+(\\.\\d+)?"); 
         }else{
             return false;
         }
@@ -56,6 +66,10 @@ public class Input {
                 defaultVal = data.get("default");
             }
         }
+        if(data.containsKey("help")){
+            boolean help = data.get("isHelpOn").equals("true") ? true : false;
+            Help.installTooltip(data.get("help"), textField, help);
+        }
         textField.textProperty().addListener(new ChangeListener<String>() {
             @Override public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
                 try {
@@ -73,7 +87,7 @@ public class Input {
                         }
                     }
                     
-                    if(!newValue.isEmpty()){
+                    if(!newValue.isEmpty() && !(newValue.equals("0")||newValue.equals("0."))){
                         float value = Float.parseFloat(newValue);
                         if(min>value){
                             textField.setText(min+"");
@@ -105,6 +119,10 @@ public class Input {
             if(isNumeric(data.get("default"), "integer")){
                 defaultVal = data.get("default");
             }
+        }
+        if(data.containsKey("help")){
+            boolean help = data.get("isHelpOn").equals("true") ? true : false;
+            Help.installTooltip(data.get("help"), textField, help);
         }
         textField.textProperty().addListener(new ChangeListener<String>() {
             @Override public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
@@ -149,6 +167,10 @@ public class Input {
         label.getStyleClass().add("label");
         final TextField textField = new TextField();
         textField.setId(data.get("id"));
+        if(data.containsKey("help")){
+            boolean help = data.get("isHelpOn").equals("true") ? true : false;
+            Help.installTooltip(data.get("help"), textField, help);
+        }
         textField.textProperty().addListener(new ChangeListener<String>() {
             @Override public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
                 int max;
@@ -189,10 +211,25 @@ public class Input {
                 defaultVal = true;
             }
         }
- 
+        if(data.containsKey("help")){
+            boolean help = data.get("isHelpOn").equals("true") ? true : false;
+            Help.installTooltip(data.get("help"), checkBox, help);
+        }
         checkBox.setSelected(defaultVal);
         input.getChildren().addAll(label, checkBox);
         return input;
+    }
+    
+    private static void openFile(File file) {
+        try {
+            Desktop.getDesktop().open(file);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+//            Logger.getLogger(
+//                FileChooserSample.class.getName()).log(
+//                    Level.SEVERE, null, ex
+//                );
+        }
     }
     
     public static HBox getlistboxInputInterface(final HashMap<String, String> data){
@@ -217,6 +254,54 @@ public class Input {
         return input;
     }
     
+    public static HBox getlrfileInputInterface(final HashMap<String, String> data){
+        HBox input = new HBox();
+        Boolean defaultVal=false;
+        input.getStyleClass().add("input");
+        Text label = new Text(data.get("label"));
+        label.getStyleClass().add("label");
+        final FileChooser fileChooser = new FileChooser();
+        
+        final Button openButton = new Button("Open a Picture...");
+        final Button openMultipleButton = new Button("Open Pictures...");
+ 
+        openButton.setOnAction(
+            new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(final ActionEvent e) {
+                    File file = fileChooser.showOpenDialog(new Stage());
+                    if (file != null) {
+                        openFile(file);
+                    }
+                }
+            });
+        input.getChildren().addAll(label, openButton);
+        return input;
+    }
+    public static HBox getrfileInputInterface(final HashMap<String, String> data){
+        HBox input = new HBox();
+        Boolean defaultVal=false;
+        input.getStyleClass().add("input");
+        Text label = new Text(data.get("label"));
+        label.getStyleClass().add("label");
+        final FileChooser fileChooser = new FileChooser();
+        
+        final Button openButton = new Button("Open a Picture...");
+        final Button openMultipleButton = new Button("Open Pictures...");
+ 
+        openButton.setOnAction(
+            new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(final ActionEvent e) {
+                    File file = fileChooser.showOpenDialog(new Stage());
+                    if (file != null) {
+                        openFile(file);
+                    }
+                }
+            });
+        input.getChildren().addAll(label, openButton);
+        return input;
+    }
     public static HBox getradioInputInterface(final HashMap<String, String> data){
         HBox input = new HBox();
         input.setId(data.get("name"));
@@ -231,6 +316,10 @@ public class Input {
                     data.get("checked").equals("TRUE")||data.get("checked").equals("on")){
                 checked = true;
             }
+        }
+        if(data.containsKey("help")){
+            boolean help = data.get("isHelpOn").equals("true") ? true : false;
+            Help.installTooltip(data.get("help"), radio, help);
         }
         radio.setSelected(checked);
         input.getChildren().addAll(label, radio);
@@ -268,7 +357,10 @@ public class Input {
        }
        catch (NumberFormatException ex) {
        }
-
+        if(data.containsKey("help")){
+            boolean help = data.get("isHelpOn").equals("true") ? true : false;
+            Help.installTooltip(data.get("help"), text, help);
+        }
         text.setText(defaultText);
         input.getChildren().addAll(label, text);
         return input;
@@ -313,6 +405,12 @@ public class Input {
             break;
         case "listbox":
             input = getlistboxInputInterface(data);
+            break;
+        case "lrfile":
+            input = getlrfileInputInterface(data);
+            break;
+        case "rfile":
+            input = getrfileInputInterface(data);
             break;
         case "textarea":
             input = gettextareaInputInterface(data);

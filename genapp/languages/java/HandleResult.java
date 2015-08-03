@@ -4,10 +4,8 @@ import input.Input;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Iterator;
 
 import javafx.scene.Node;
@@ -68,20 +66,6 @@ public class HandleResult {
  
     }
     
-    public static HashMap<String, String> getAppConfig(){
-        HashMap<String, String> appConfig = new HashMap<String, String>();
-        JSONParser parser = new JSONParser();
-        try {        
-            JSONObject config = (JSONObject) parser.parse(new FileReader("__appconfig__"));
-            String resourceDefault = (String) config.get("resourcedefault");
-            appConfig.put("resourceDefault", resourceDefault);
-        
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return appConfig;
-    }
-    
     public static JSONObject getInputJSON(VBox input){
         JSONObject json = new JSONObject();
         Iterator<Node> inputIt = input.getChildren().iterator();
@@ -102,6 +86,7 @@ public class HandleResult {
     
     public static void setOutput(VBox output, JSONObject jsonObject){
         Iterator<Node> outIt = output.getChildren().iterator();
+        System.out.println(jsonObject);
         while(outIt.hasNext()){
             HBox hb = (HBox) outIt.next();
             if(hb.getChildren().size() > 1){
@@ -136,17 +121,24 @@ public class HandleResult {
 
     }
     
-    public static JSONObject prepareToRun(String id,String executable, VBox inputBox) throws IOException, SecurityException{
+    public static JSONObject prepareToRun(String id,String path, String module, VBox inputBox) throws IOException, SecurityException{
+        String cmds;
         JSONObject json = new JSONObject();
         String uuid = HandleResult.uniqid(id);
-        String base_dir = "__docroot:java__/abhishektest_java/"+uuid;
+        String base_dir = "__docroot:java__/__application___java/"+uuid;
         JSONObject args = getInputJSON(inputBox);
         createDirectory(base_dir);
         args.put("_uuid", uuid);
         args.put("_base_directory", base_dir);
         args.put("_log_directory", base_dir);
-        args.put("resourcedefault", "");
-        String cmds = executable+" '"+args+"' 2> "+base_dir+"/_stderr_"+uuid+" | head -c50000000";
+        if(AppConfig.runAiravata()){
+            args.put("resourcedefault", "airavata");
+            cmds = "java -cp \".:lib/*\" airavata.LaunchExperiment "+module+" '"+args+"'";
+        }else{
+            cmds = path+module+" '"+args+"'";            
+            args.put("resourcedefault", "");
+        }
+        cmds = cmds+" 2> "+base_dir+"/_stderr_"+uuid+" | head -c50000000";
         json.put("uuid", uuid);
         json.put("base_dir", base_dir);
         json.put("cmds", cmds);

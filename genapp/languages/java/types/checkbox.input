@@ -4,5 +4,6 @@ __fields:role__.add(new HashMap<String, String>(){{
             __~fields:label{put("label", "__fields:label__");}
             __~fields:type{put("type", "__fields:type__");}
             __~fields:checked{put("checked", "__fields:checked__");}
+            __~fields:help{put("help", "__fields:help__");}
 	   }
 });

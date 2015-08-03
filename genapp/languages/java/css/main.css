@@ -148,3 +148,8 @@
  -fx-background:rgb(__background_color_rgb__);
  -fx-border-color:rgb(__background_color_rgb__);
 }
+
+.link {
+  -fx-cursor:hand;
+  -fx-underline:true;
+}

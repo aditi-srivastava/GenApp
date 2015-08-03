@@ -25,6 +25,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import util.Help;
 
 public class __application__ extends Application implements EventHandler<MouseEvent>{
     
@@ -56,12 +57,12 @@ public class __application__ extends Application implements EventHandler<MouseEv
         border.getStyleClass().add("main");
         scene = new Scene(main);      
         scene.getStylesheets().add(__application__.class.getResource("css/main.css").toExternalForm());
-        setTooltips();
         stage.setMaximized(true);
         stage.setScene(scene);
         stage.setTitle("__application__");
         stage.getIcons().add(new Image(__application__.class.getResource("favicon.ico").toExternalForm()));
         stage.show();
+        Help.setTooltips(scene, appState.isHelpOn());
     }
 
     private BorderPane getHeader(){
@@ -73,7 +74,6 @@ public class __application__ extends Application implements EventHandler<MouseEv
         help.setId("help");
         help.setOnMouseClicked(this);
         menuButton = new MenuItemIcon();
-//        menuButton.getStyleClass().add("menu");
         menuButton.setId("menu-button");
         HBox hb = new HBox();
         hb.getStyleClass().add("menu-button-box");
@@ -175,26 +175,7 @@ public void setMenuImage(String image){
     hb.setStyle("-fx-background-image: url('"+img+"');");
 }
 
-public void setTooltips(){
-        installTooltip("menu help",scene.lookup("#menu-button"));
-        installTooltip("tools help",scene.lookup("#Tools"));
-        installTooltip("build help",scene.lookup("#Build"));
-        installTooltip("Interact help",scene.lookup("#Interact"));
-        installTooltip("simulate help",scene.lookup("#Simulate"));
-        installTooltip("calculate help",scene.lookup("#Calculate"));
-        installTooltip("Analyze help",scene.lookup("#Analyze"));
-        installTooltip("help help",scene.lookup("#help"));
-}
 
-public void installTooltip(String text, Node node){
-    Tooltip tp = new Tooltip(text);
-    tp.getStyleClass().add("tooltip");
-    if(appState.isHelpOn()){
-        Tooltip.install(node, tp);
-    }else{
-        Tooltip.uninstall(node, tp);
-    }
-}
 @Override
 public void handle(MouseEvent event) {
     if(event.getSource() instanceof HBox){
@@ -252,5 +233,5 @@ public void handle(MouseEvent event) {
             }else{
                 bt.setText("Help Off");
             }
-            setTooltips();
-            break;
+            Help.setTooltips(scene, appState.isHelpOn());
+        break;

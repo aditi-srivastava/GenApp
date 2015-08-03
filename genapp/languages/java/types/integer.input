@@ -7,5 +7,6 @@ __fields:role__.add(new HashMap<String, String>(){{
             __~fields:min{put("min", "__fields:min__");}
             __~fields:max{put("max", "__fields:max__");}
             __~fields:required{put("required", "__fields:required__");}
+            __~fields:help{put("help", "__fields:help__");}
             }
 });

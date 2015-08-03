@@ -21,20 +21,23 @@ import javafx.scene.control.ProgressBar;
 
 public class __menu:modules:id__ extends VBox implements EventHandler<MouseEvent>{
     private VBox inputBox, outputBox;
+    private boolean isHelpOn;
 
-    public __menu:modules:id__(){
+    public __menu:modules:id__(boolean isHelpOn){
+        this.isHelpOn = isHelpOn;
         this.getStyleClass().add("module");
         inputBox = setInputs();
         outputBox = setOutputs();
         outputBox.getStyleClass().addAll("outputBox", "outputs");
         inputBox.getStyleClass().add("inputs");
-        this.setId("__menu:modules:label___module");
+        this.setId("__menu:modules:id___module");
         this.getChildren().addAll(inputBox, outputBox);
     }
     
     private VBox setInputs(){
         VBox inputs = new VBox();
         for (HashMap<String, String> data : __menu:modules:id___data.input) {
+            data.put("isHelpOn", isHelpOn+"");
             HBox input = Input.getInputInterface(data, inputs);
             inputs.getChildren().add(input);    
         }
@@ -77,7 +80,7 @@ public class __menu:modules:id__ extends VBox implements EventHandler<MouseEvent
             ProgressBar pb = (ProgressBar) inputBox.lookup("#progress");
             pb.setVisible(true);
             try {
-                data = HandleResult.prepareToRun("__menu:modules:id___","__executable_path:java__/__menu:modules:id__",inputBox);
+                data = HandleResult.prepareToRun("__menu:modules:id___","__executable_path:java__/","__menu:modules:id__",inputBox);
                 JobRun jb = new JobRun(data, outputBox, inputBox);
                 Thread jobThread = new Thread(jb);
                 jobThread.start();
