@@ -31,14 +31,29 @@
                   ,"udpport" : 37779
                  }
   ,"resources" : {
-                  "local"      : ""
-                 }
+      "local"              :  ""
+      ,"airavata"          : {
+          "run" : "airavatarun",
+          "properties"   : {
+              "server" : "127.0.0.1",
+              "port" : 8930,
+              "timeout" : 5000,
+              "credentialStoreToken" : "2c308fa9-99f8-4baa-92e4-d062e311483c",
+              "gateway" : "genAppGateway",
+              "gatewayName" : "GenApp_Gateway",
+              "login" : "admin",
+              "projectAccount" : "ixxi-2013",
+              "email" : "emre@biochem.uthscsa.edu"
+            },
+            "resources"   : [
+              {
+                  "host":"stampede",
+                  "description":"Stampede Resource",
+              }
+          ]
+      }
+  }
   ,"resourcedefault" : "local"
-##########If using airavata use this this resources instead of local##############
-  #  ,"resources" : {
-  #                "airavata"      : "airavatarun"
-  #               }
-  #,"resourcedefault" : "airavata"
 # submitpolicy "login" requres users to login by default
   ,"submitpolicy"    : "login"
 }
