@@ -62,14 +62,10 @@ public class Register {
     }
     
     private void init(){
-        JSONObject appConfig = AppConfig.getAppConfig();
-        if(appConfig.get("resourcedefault").equals("airavata")){
-            JSONObject resources = (JSONObject)appConfig.get("resources");
-            airvata_properties = (JSONObject) resources.get("airavata_properties");
-            THRIFT_SERVER_HOST = (String) airvata_properties.get("AIRAVATA_SERVER");
-            THRIFT_SERVER_PORT = Integer.parseInt((long) airvata_properties.get("AIRAVATA_PORT")+"");
-            DEFAULT_GATEWAY = (String) airvata_properties.get("AIRAVATA_GATEWAY");
-        }
+        airvata_properties = AppConfig.getAiravataProperties();
+        THRIFT_SERVER_HOST = (String) airvata_properties.get("server");
+        THRIFT_SERVER_PORT = Integer.parseInt((long) airvata_properties.get("port")+"");
+        DEFAULT_GATEWAY = (String) airvata_properties.get("gateway");
         executablePath = ModulesUtils.getExecutablePath();
     }
     
@@ -88,8 +84,9 @@ public class Register {
             gatewayProfileRegistered = true; 
         }else{
                 System.out.println("\n #### Registering Localhost Computational Resource #### \n");
+                JSONObject cmr = AppConfig.getComputeResource();
                 ComputeResourceDescription computeResourceDescription = RegisterUtils.
-                        createComputeResourceDescription("localhost", "LocalHost", null, null);
+                        createComputeResourceDescription((String)cmr.get("host"), (String)cmr.get("description"), null, null);
                 hostId = airavataClient.registerComputeResource(computeResourceDescription);
                 ResourceJobManager resourceJobManager = RegisterUtils.
                         createResourceJobManager(ResourceJobManagerType.FORK, null, null, null);
@@ -120,9 +117,9 @@ public class Register {
         Iterator<String> modulesIt = allModules.iterator();
         while(modulesIt.hasNext()){
             String id = modulesIt.next();
-            if(registeredModules.containsKey(id+"_java")){
-                if(registeredModules.get(id+"_java").equals(id)){
-                    System.out.println("### "+id+" Already registered for java");
+            if(registeredModules.containsKey(id)){
+                if(registeredModules.get(id).equals(id)){
+                    System.out.println("### "+id+" Already registered");
                 }else{
                     unregistered.add(id);
                 }

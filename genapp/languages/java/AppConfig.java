@@ -2,6 +2,7 @@ package util;
 
 import java.io.FileReader;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -19,6 +20,7 @@ public class AppConfig {
         return appConfig;
     }
     
+    
     public static boolean runAiravata(){
         boolean airavata = false;
         JSONObject config = getAppConfig();
@@ -26,13 +28,45 @@ public class AppConfig {
         if(resource.equals("airavata")){
             JSONObject jsonResource = (JSONObject) config.get("resources");
             if(jsonResource.containsKey(resource)){
-                String airavataRun = (String) jsonResource.get(resource);
-                if(airavataRun.equals("airavatarun-0.15")){
+                JSONObject airavataProp = (JSONObject) jsonResource.get(resource);
+                String run = (String) airavataProp.get("run");
+                if(run.equals("airavatarun")){
                     airavata = true;
                 }
             }
         }
         return airavata;
     }
+    
+    public static JSONObject getAiravataProperties(){
+        JSONObject properties = null;
+        JSONObject config = getAppConfig();
+        String resource = (String) config.get("resourcedefault");
+        if(resource.equals("airavata")){
+            JSONObject jsonResource = (JSONObject) config.get("resources");
+            if(jsonResource.containsKey(resource)){
+                JSONObject airavata = (JSONObject) jsonResource.get(resource);
+                properties = (JSONObject) airavata.get("properties");
+            }
+        }
+        return properties;
+    }
+    
+    public static JSONObject getComputeResource(){
+        JSONObject computeResource = null;
+        JSONObject config = getAppConfig();
+        String resource = (String) config.get("resourcedefault");
+        if(resource.equals("airavata")){
+            JSONObject jsonResource = (JSONObject) config.get("resources");
+            if(jsonResource.containsKey(resource)){
+                JSONObject airavata = (JSONObject) jsonResource.get(resource);
+                JSONArray cmr = (JSONArray) airavata.get("resources");
+                computeResource = (JSONObject) cmr.get(0);
+            }
+        }
+        return computeResource;
+    }
+    
+    
 
 }

@@ -38,6 +38,7 @@ public class __menu:modules:id__ extends VBox implements EventHandler<MouseEvent
         VBox inputs = new VBox();
         for (HashMap<String, String> data : __menu:modules:id___data.input) {
             data.put("isHelpOn", isHelpOn+"");
+            data.put("module", "__menu:modules:id___data");
             HBox input = Input.getInputInterface(data, inputs);
             inputs.getChildren().add(input);    
         }

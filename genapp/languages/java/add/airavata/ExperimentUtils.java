@@ -41,17 +41,13 @@ public class ExperimentUtils {
     
     private void init(){
         
-        JSONObject appConfig = AppConfig.getAppConfig();
-        if(appConfig.get("resourcedefault").equals("airavata")){
-            JSONObject resources = (JSONObject)appConfig.get("resources");
-            JSONObject airvata_properties = (JSONObject) resources.get("airavata_properties");
-            THRIFT_SERVER_HOST = (String) airvata_properties.get("AIRAVATA_SERVER");
-            THRIFT_SERVER_PORT = Integer.parseInt((long) airvata_properties.get("AIRAVATA_PORT")+"");
-            DEFAULT_GATEWAY = (String) airvata_properties.get("AIRAVATA_GATEWAY");
-            OWNER = (String) airvata_properties.get("AIRAVATA_LOGIN");
-            TOKEN = (String) airvata_properties.get("AIRAVATA_CREDENTIAL_STORE_TOKEN");
-            PROJECT_ACCOUNT_NAME = (String) airvata_properties.get("AIRAVATA_PROJECT_ACCOUNT");
-        }
+        JSONObject airvata_properties = AppConfig.getAiravataProperties();
+        THRIFT_SERVER_HOST = (String) airvata_properties.get("server");
+        THRIFT_SERVER_PORT = Integer.parseInt((long) airvata_properties.get("port")+"");
+        DEFAULT_GATEWAY = (String) airvata_properties.get("gateway");
+        OWNER = (String) airvata_properties.get("login");
+        TOKEN = (String) airvata_properties.get("credentialStoreToken");
+        PROJECT_ACCOUNT_NAME = (String) airvata_properties.get("projectAccount");
     }
     
    public void CreateAiravataClient() throws AiravataClientConnectException{

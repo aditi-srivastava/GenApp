@@ -1,4 +1,4 @@
-__fields:role__.add(new HashMap<String, String>(){{
+__~fields:repeat{repeater_}__fields:role__.add(new HashMap<String, String>(){{
             __~fields:role{put("role", "__fields:role__");}
             __~fields:id{put("id", "__fields:id__");}
             __~fields:label{put("label", "__fields:label__");}
@@ -7,5 +7,7 @@ __fields:role__.add(new HashMap<String, String>(){{
             __~fields:name{put("name", "__fields:name__");}
             __~fields:rows{put("rows", "__fields:rows__");}
             __~fields:cols{put("cols", "__fields:cols__");}
+            __~fields:repeater{put("repeater", "__fields:repeater__");}
+            __~fields:repeat{put("repeat", "__fields:repeat__");}
 																																																																																																																																																																																																																																									            }
 });

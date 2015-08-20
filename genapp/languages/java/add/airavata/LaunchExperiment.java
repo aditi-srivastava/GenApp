@@ -12,8 +12,8 @@ public class LaunchExperiment {
              JSONObject error = new JSONObject();
             try {
                 ExperimentUtils exp = new ExperimentUtils();
-                String projId = exp.CreateProject("test");
-                String expId=exp.CreateExperiment("exp5", projId, appId,json);
+                String projId = exp.CreateProject("genapp");
+                String expId=exp.CreateExperiment("experiment", projId, appId,json);
                 exp.launchExperiment(expId);
                 System.out.println(exp.getOutput(expId));
             } catch (TException e) {

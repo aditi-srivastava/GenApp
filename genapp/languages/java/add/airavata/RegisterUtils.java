@@ -30,10 +30,10 @@ import org.json.simple.JSONObject;
 public class RegisterUtils {
     public static Gateway createGateway(JSONObject properties){
         Gateway gateway = new Gateway();
-        gateway.setGatewayId((String) properties.get("AIRAVATA_GATEWAY"));
-        gateway.setGatewayName((String) properties.get("AIRAVATA_GATEWAY_NAME"));
-        gateway.setDomain((String) properties.get("AIRAVATA_SERVER"));
-        gateway.setEmailAddress((String) properties.get("AIRAVATA_EMAIL"));
+        gateway.setGatewayId((String) properties.get("gateway"));
+        gateway.setGatewayName((String) properties.get("gatewayName"));
+        gateway.setDomain((String) properties.get("server"));
+        gateway.setEmailAddress((String) properties.get("email"));
         return gateway;
     }
     
@@ -151,7 +151,7 @@ public class RegisterUtils {
     ApplicationInterfaceDescription applicationInterfaceDescription = new ApplicationInterfaceDescription();
     
     applicationInterfaceDescription.setApplicationName(applicationName);
-    applicationInterfaceDescription.setApplicationInterfaceId(applicationName+"_java");
+    applicationInterfaceDescription.setApplicationInterfaceId(applicationName);
     if (applicationDescription != null) applicationInterfaceDescription.setApplicationDescription(applicationDescription);
     if (applicationModules != null) applicationInterfaceDescription.setApplicationModules(applicationModules);
     if (applicationInputs != null) applicationInterfaceDescription.setApplicationInputs(applicationInputs);

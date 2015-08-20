@@ -26,6 +26,14 @@
                     "inputs"     : [ 
                                      { "run.sh" : "once" }
                                    ]
+                   }    
+                   ,{
+                    "frequency"  : "once",
+                    "output"     : "register",
+                    "setexecutable" : "true",
+                    "inputs"     : [ 
+                                     { "register.sh" : "once" }
+                                   ]
                    }                    
                    ,{
                     "frequency"  : "once",
@@ -63,6 +71,15 @@
                                      ,{"data/footer.java": "once"}
                                    ]
                    }
+                 ,{
+                    "frequency"  : "once",
+                    "output"     : "data/Repeater.java",
+                    "inputs"     : [ 
+                                     { "data/repeater_header.java" : "once" }
+                                     ,{"data/repeater.java": "menu:modules:id"}
+                                     ,{"data/repeater_footer.java": "once"}
+                                   ]
+                   }
                    ,{
                     "frequency"  : "menu:modules:id",
                     "output"     : "data/__menu:modules:id___data.java",
@@ -75,9 +92,35 @@
                    }
                    ,{
                     "frequency"  : "once",
+                    "output"     : "util/Help.java",
+                    "inputs"     : [ 
+                                     { "help/Help.java" : "once" }
+                                     ,{"help/menuHelp.java"  : "menu:id"}
+                                     ,{"help/modulesHelp.java"  : "fields:id"}
+                                     ,{"help/helpFooter.java": "once"}
+                                   ]
+                   }
+                   ,{
+                    "frequency"  : "once",
                     "output"     : "util/HandleResult.java",
                     "inputs"     : [ 
                                      {"HandleResult.java": "once"}
+                                   ]
+                   }
+                   ,{
+                    "frequency"  : "once",
+                    "output"     : "util/AppConfig.java",
+                    "inputs"     : [ 
+                                     {"AppConfig.java": "once"}
+                                   ]
+                   }
+                   ,{
+                    "frequency"  : "once",
+                    "output"     : "airavata/ModulesUtils.java",
+                    "inputs"     : [ 
+                                     { "airavata/header.java" : "once" }
+                                     ,{"airavata/ModulesUtils.java"  : "menu:modules:id"}
+                                     ,{"airavata/footer.java"  : "once"}
                                    ]
                    }
        ]
