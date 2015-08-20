@@ -44,6 +44,10 @@ class InputDataObjectType {
   public $standardInput = false;
   public $userFriendlyDescription = null;
   public $metaData = null;
+  public $inputOrder = null;
+  public $isRequired = null;
+  public $requiredToAddedToCommandLine = null;
+  public $dataStaged = false;
 
   public function __construct($vals=null) {
     if (!isset(self::$_TSPEC)) {
@@ -76,6 +80,22 @@ class InputDataObjectType {
           'var' => 'metaData',
           'type' => TType::STRING,
           ),
+        8 => array(
+          'var' => 'inputOrder',
+          'type' => TType::I32,
+          ),
+        9 => array(
+          'var' => 'isRequired',
+          'type' => TType::BOOL,
+          ),
+        10 => array(
+          'var' => 'requiredToAddedToCommandLine',
+          'type' => TType::BOOL,
+          ),
+        11 => array(
+          'var' => 'dataStaged',
+          'type' => TType::BOOL,
+          ),
         );
     }
     if (is_array($vals)) {
@@ -99,6 +119,18 @@ class InputDataObjectType {
       }
       if (isset($vals['metaData'])) {
         $this->metaData = $vals['metaData'];
+      }
+      if (isset($vals['inputOrder'])) {
+        $this->inputOrder = $vals['inputOrder'];
+      }
+      if (isset($vals['isRequired'])) {
+        $this->isRequired = $vals['isRequired'];
+      }
+      if (isset($vals['requiredToAddedToCommandLine'])) {
+        $this->requiredToAddedToCommandLine = $vals['requiredToAddedToCommandLine'];
+      }
+      if (isset($vals['dataStaged'])) {
+        $this->dataStaged = $vals['dataStaged'];
       }
     }
   }
@@ -171,6 +203,34 @@ class InputDataObjectType {
             $xfer += $input->skip($ftype);
           }
           break;
+        case 8:
+          if ($ftype == TType::I32) {
+            $xfer += $input->readI32($this->inputOrder);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 9:
+          if ($ftype == TType::BOOL) {
+            $xfer += $input->readBool($this->isRequired);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 10:
+          if ($ftype == TType::BOOL) {
+            $xfer += $input->readBool($this->requiredToAddedToCommandLine);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 11:
+          if ($ftype == TType::BOOL) {
+            $xfer += $input->readBool($this->dataStaged);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
         default:
           $xfer += $input->skip($ftype);
           break;
@@ -219,6 +279,26 @@ class InputDataObjectType {
       $xfer += $output->writeString($this->metaData);
       $xfer += $output->writeFieldEnd();
     }
+    if ($this->inputOrder !== null) {
+      $xfer += $output->writeFieldBegin('inputOrder', TType::I32, 8);
+      $xfer += $output->writeI32($this->inputOrder);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->isRequired !== null) {
+      $xfer += $output->writeFieldBegin('isRequired', TType::BOOL, 9);
+      $xfer += $output->writeBool($this->isRequired);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->requiredToAddedToCommandLine !== null) {
+      $xfer += $output->writeFieldBegin('requiredToAddedToCommandLine', TType::BOOL, 10);
+      $xfer += $output->writeBool($this->requiredToAddedToCommandLine);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->dataStaged !== null) {
+      $xfer += $output->writeFieldBegin('dataStaged', TType::BOOL, 11);
+      $xfer += $output->writeBool($this->dataStaged);
+      $xfer += $output->writeFieldEnd();
+    }
     $xfer += $output->writeFieldStop();
     $xfer += $output->writeStructEnd();
     return $xfer;
@@ -232,6 +312,12 @@ class OutputDataObjectType {
   public $name = null;
   public $value = null;
   public $type = null;
+  public $applicationArgument = null;
+  public $isRequired = null;
+  public $requiredToAddedToCommandLine = null;
+  public $dataMovement = null;
+  public $location = null;
+  public $searchQuery = null;
 
   public function __construct($vals=null) {
     if (!isset(self::$_TSPEC)) {
@@ -248,6 +334,30 @@ class OutputDataObjectType {
           'var' => 'type',
           'type' => TType::I32,
           ),
+        4 => array(
+          'var' => 'applicationArgument',
+          'type' => TType::STRING,
+          ),
+        5 => array(
+          'var' => 'isRequired',
+          'type' => TType::BOOL,
+          ),
+        6 => array(
+          'var' => 'requiredToAddedToCommandLine',
+          'type' => TType::BOOL,
+          ),
+        7 => array(
+          'var' => 'dataMovement',
+          'type' => TType::BOOL,
+          ),
+        8 => array(
+          'var' => 'location',
+          'type' => TType::STRING,
+          ),
+        9 => array(
+          'var' => 'searchQuery',
+          'type' => TType::STRING,
+          ),
         );
     }
     if (is_array($vals)) {
@@ -259,6 +369,24 @@ class OutputDataObjectType {
       }
       if (isset($vals['type'])) {
         $this->type = $vals['type'];
+      }
+      if (isset($vals['applicationArgument'])) {
+        $this->applicationArgument = $vals['applicationArgument'];
+      }
+      if (isset($vals['isRequired'])) {
+        $this->isRequired = $vals['isRequired'];
+      }
+      if (isset($vals['requiredToAddedToCommandLine'])) {
+        $this->requiredToAddedToCommandLine = $vals['requiredToAddedToCommandLine'];
+      }
+      if (isset($vals['dataMovement'])) {
+        $this->dataMovement = $vals['dataMovement'];
+      }
+      if (isset($vals['location'])) {
+        $this->location = $vals['location'];
+      }
+      if (isset($vals['searchQuery'])) {
+        $this->searchQuery = $vals['searchQuery'];
       }
     }
   }
@@ -303,6 +431,48 @@ class OutputDataObjectType {
             $xfer += $input->skip($ftype);
           }
           break;
+        case 4:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->applicationArgument);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 5:
+          if ($ftype == TType::BOOL) {
+            $xfer += $input->readBool($this->isRequired);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 6:
+          if ($ftype == TType::BOOL) {
+            $xfer += $input->readBool($this->requiredToAddedToCommandLine);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 7:
+          if ($ftype == TType::BOOL) {
+            $xfer += $input->readBool($this->dataMovement);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 8:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->location);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 9:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->searchQuery);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
         default:
           $xfer += $input->skip($ftype);
           break;
@@ -329,6 +499,36 @@ class OutputDataObjectType {
     if ($this->type !== null) {
       $xfer += $output->writeFieldBegin('type', TType::I32, 3);
       $xfer += $output->writeI32($this->type);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->applicationArgument !== null) {
+      $xfer += $output->writeFieldBegin('applicationArgument', TType::STRING, 4);
+      $xfer += $output->writeString($this->applicationArgument);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->isRequired !== null) {
+      $xfer += $output->writeFieldBegin('isRequired', TType::BOOL, 5);
+      $xfer += $output->writeBool($this->isRequired);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->requiredToAddedToCommandLine !== null) {
+      $xfer += $output->writeFieldBegin('requiredToAddedToCommandLine', TType::BOOL, 6);
+      $xfer += $output->writeBool($this->requiredToAddedToCommandLine);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->dataMovement !== null) {
+      $xfer += $output->writeFieldBegin('dataMovement', TType::BOOL, 7);
+      $xfer += $output->writeBool($this->dataMovement);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->location !== null) {
+      $xfer += $output->writeFieldBegin('location', TType::STRING, 8);
+      $xfer += $output->writeString($this->location);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->searchQuery !== null) {
+      $xfer += $output->writeFieldBegin('searchQuery', TType::STRING, 9);
+      $xfer += $output->writeString($this->searchQuery);
       $xfer += $output->writeFieldEnd();
     }
     $xfer += $output->writeFieldStop();

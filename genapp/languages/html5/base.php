@@ -299,6 +299,9 @@ if ( !isset( $_SESSION[ $window ][ 'resources' ]->$_SESSION[ $window ][ 'resourc
       $cmdprefix = $_SESSION[ $window ][ 'resources' ]->$_SESSION[ $window ][ 'resourcedefault' ];
       $GLOBALS[ 'resource' ] = $_SESSION[ $window ][ 'resourcedefault' ];
    }
+  if(isset($cmdprefix->run)){
+      $cmdprefix = $cmdprefix->run;
+  }
    if ( strlen( $cmdprefix ) > 1 )
    {  
       $fileargs = 1;
@@ -583,7 +586,7 @@ __~debug:basemylog{    error_log( "request ready to jsonize\n" . print_r( $_REQU
          exit();
       }
       ob_end_clean();
-      if(strpos($cmdprefix, "airavatarun") >= 0){ 
+      if($cmdprefix == "airavatarun"){ 
          $cmd = "$adir/$cmdprefix";
          $cmd .= " __menu:modules:id__";
          $cmd .= " '$json'"; 

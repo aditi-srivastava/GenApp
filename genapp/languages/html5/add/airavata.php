@@ -1,9 +1,5 @@
 <?php
 
-// include 'airavata/getAiravataClient.php';
-// global $airavataclient;
-// global $transport;
-
 $GLOBALS['THRIFT_ROOT'] = 'airavata/lib/Thrift/';
 require_once $GLOBALS['THRIFT_ROOT'] . 'Transport/TTransport.php';
 require_once $GLOBALS['THRIFT_ROOT'] . 'Transport/TBufferedTransport.php';
@@ -29,6 +25,7 @@ require_once $GLOBALS['AIRAVATA_ROOT'] . 'Model/Workspace/Experiment/Types.php';
 require_once $GLOBALS['AIRAVATA_ROOT'] . 'API/Error/Types.php';
 
 require_once 'airavata/lib/AiravataClientFactory.php';
+require_once 'airavata/clientProperties.php';
 
 use Airavata\API\Error\AiravataClientException;
 use Airavata\API\Error\AiravataSystemException;
@@ -42,325 +39,321 @@ use Airavata\Model\Workspace\Project;
 use Airavata\Model\Workspace\Experiment\Experiment;
 use Airavata\Model\Workspace\Experiment\UserConfigurationData;
 use Airavata\Model\Workspace\Experiment\ComputationalResourceScheduling;
-use Airavata\API\Error\ExperimentNotFoundException;	
+use Airavata\API\Error\ExperimentNotFoundException;
 use Airavata\Model\Workspace\Experiment\ExperimentState;
 use Thrift\Exception\TTransportException;
+use Thrift\Exception\TException;
 use Airavata\Model\AppCatalog\AppInterface\InputDataObjectType;
 use Airavata\Model\AppCatalog\AppInterface\OutputDataObjectType;
 use Airavata\Model\AppCatalog\AppInterface\DataType;
 
 
-// #airavata functions
-// global $transport;
-// global $airavataclient;
-// function startTransport(){
-// $airavataconfig = parse_ini_file("airavata/airavata-client-properties.ini");
-// $transport = new TSocket($airavataconfig['AIRAVATA_SERVER'], $airavataconfig['AIRAVATA_PORT']);
-// $transport->setSendTimeout($airavataconfig['AIRAVATA_TIMEOUT']);
-// $protocol = new TBinaryProtocol($transport);
-// $transport->open();
-// $airavataclient = new AiravataClient($protocol);
-// global $airavataclient;
-// global $transport;
-// }
 
-function stopTransport(){
-  global $transport;
-  $transport->close();
+function createProject($projectName){
+    getProperties(); 
+    // $airavataconfig = parse_ini_file("airavata-0.15/airavata-client-properties.ini");
+    $transport = new TSocket($GLOBALS['AIRAVATA_SERVER'], $GLOBALS['AIRAVATA_PORT']);
+    $transport->setRecvTimeout($GLOBALS['AIRAVATA_TIMEOUT']);
+    $transport->setSendTimeout($GLOBALS['AIRAVATA_TIMEOUT']);
+    $gatewayId = $GLOBALS['AIRAVATA_GATEWAY'];
+    $owner = $GLOBALS['AIRAVATA_LOGIN'];
+    $protocol = new TBinaryProtocol($transport);
+    try
+    {
+        $transport->open();
+        $airavataclient = new AiravataClient($protocol);
+        $project = new Project();
+        $project->owner = $owner;
+        $project->name = $projectName;
+        $projId = $airavataclient->createProject($gatewayId, $project);
+        $outputData = array();
+
+        if ($projId)
+        {
+            $outputData["ProjectId"] = $projId;
+            // return json_encode($output);
+        }
+        else
+        {
+            $outputData["error"] = 'Failed to create project.';
+        }
+
+        $transport->close();
+    }
+    catch (InvalidRequestException $ire)
+    {
+        $outputData["error"] = 'InvalidRequestException: ' . $ire->getMessage();
+    }
+    catch (AiravataClientException $ace)
+    {
+        $outputData["error"] = 'Airavata System Exception: ' . $ace->getMessage();
+    }
+    catch (AiravataSystemException $ase)
+    {
+        $outputData["error"] = 'Airavata System Exception: ' . $ase->getMessage();
+    }
+    catch(TException $tx)
+    {
+        $outputData["error"] = 'There is some connection problem, please check if airavata is runnig properly and try again later';
+    }
+    catch (\Exception $e)
+    {
+        $outputData["error"] = 'Exception: ' . $e->getMessage();
+    }
+    return json_encode($outputData);
 }
 
+function createExperiment($expName, $projId, $appId, $inp){
+    // if(!isset($GLOBALS['AIRAVATA_SERVER']){
+        getProperties();
+    // }
+    // $airavataconfig = parse_ini_file("airavata-0.15/airavata-client-properties.ini");
+    $transport = new TSocket($GLOBALS['AIRAVATA_SERVER'], $GLOBALS['AIRAVATA_PORT']);
+    $transport->setSendTimeout($GLOBALS['AIRAVATA_TIMEOUT']);
+    $protocol = new TBinaryProtocol($transport);
+    try
+    {
+        $transport->open();
+        $airavataclient = new AiravataClient($protocol);
+        /* Experiment input and output data. */
+        $input = new InputDataObjectType();
+        $input->name = "input";
+        $input->value = $inp;
+        $input->type = DataType::STRING;
+        $exInputs = array($input);
+        $output = new OutputDataObjectType();
+        $output->name = "output";
+        $output->value = "";
+        $output->type = DataType::STDOUT;
+        $err = new OutputDataObjectType();
+        $err->name = "output_err";
+        $err->value = "";
+        $err->type = DataType::STDERR;
+        $exOutputs = array($output,$err);
 
-function createProject($owner, $projectName){
-	include 'airavata/getAiravataClient.php';
+        /* Create Experiment: needs to update using unique project ID. */
+        $user = $GLOBALS['AIRAVATA_LOGIN'];
+        $host = $GLOBALS['AIRAVATA_SERVER'];
+        // $hostname = $airavataconfig['AIRAVATA_SERVER_ALIAS'];
+        $gatewayId = $GLOBALS['AIRAVATA_GATEWAY'];
+        $proAccount = $GLOBALS['AIRAVATA_PROJECT_ACCOUNT'];
+        $exp_name = $expName;
+        $proj = $projId;
 
-	// global $airavataclient;
-	// $airavataconfig = parse_ini_file("airavata/airavata-client-properties.ini");
-	// $transport = new TSocket($airavataconfig['AIRAVATA_SERVER'], $airavataconfig['AIRAVATA_PORT']);
-	// $transport->setSendTimeout($airavataconfig['AIRAVATA_TIMEOUT']);
-	// $protocol = new TBinaryProtocol($transport);
-	// $transport->open();
-	// $airavataclient = new AiravataClient($protocol);
-	try
-	{	    
-		$project = new Project();
-		$project->owner = $owner;
-		$project->name = $projectName;		
-		$projId = $airavataclient->createProject($project);
-		
-		if ($projId)
-		{
-		    return "$projId";
-		}
-		else
-		{
-		    echo 'Failed to create project.';
-		}
-	    
-	}
-	catch (InvalidRequestException $ire)
-	{
-	    print 'InvalidRequestException: ' . $ire->getMessage()."\n";
-	}
-	catch (AiravataClientException $ace)
-	{
-	    print 'Airavata System Exception: ' . $ace->getMessage()."\n";
-	}
-	catch (AiravataSystemException $ase)
-	{
-	    print 'Airavata System Exception: ' . $ase->getMessage()."\n";
-	}
-	$transport->close();
-}
+        $experiment = new Experiment();
+        $experiment->projectID = $proj;
+        $experiment->userName = $user;
+        $experiment->name = $exp_name;
+        $experiment->applicationId = $appId;
+        $experiment->experimentInputs = $exInputs;
+        $experiment->experimentOutputs = $exOutputs;
+        $computeResources = $airavataclient->getAvailableAppInterfaceComputeResources($appId);
+        if(isset($computeResources) && !empty($computeResources)){
+            foreach ($computeResources as $key => $value) {
+                if($value == $host || $value == $hostname){
+                    $cmRST = new ComputationalResourceScheduling();
+                    $cmRST->resourceHostId = $key;
+                    $cmRST->computationalProjectAccount = $proAccount;
+                    $cmRST->nodeCount = 1;
+                    $cmRST->numberOfThreads = 1;
+                    $cmRST->queueName = "normal";
+                    $cmRST->totalCPUCount = 1;
+                    $cmRST->wallTimeLimit = 30;
+                    $cmRST->jobStartTime = 0;
+                    $cmRST->totalPhysicalMemory = 1;
+                    $userConfigurationData = new UserConfigurationData();
+                    $userConfigurationData->airavataAutoSchedule = 0;
+                    $userConfigurationData->overrideManualScheduledParams = 0;
+                    $userConfigurationData->computationalResourceScheduling = $cmRST;
+                    $experiment->userConfigurationData = $userConfigurationData;
+                }
+            }
+        }
+        $outputData = array();
+        $expId = $airavataclient->createExperiment($gatewayId,$experiment);
+        $transport->close();
 
-function createExperiment( $usrName, $expName, $projId, $execId, $inp){	
-	include 'airavata/getAiravataClient.php';
-	// global $airavataclient;
-	// $airavataconfig = parse_ini_file("airavata/airavata-client-properties.ini");
-	// $transport = new TSocket($airavataconfig['AIRAVATA_SERVER'], $airavataconfig['AIRAVATA_PORT']);
-	// $transport->setSendTimeout($airavataconfig['AIRAVATA_TIMEOUT']);
-	// $protocol = new TBinaryProtocol($transport);
-	// $transport->open();
-	// $airavataclient = new AiravataClient($protocol);
-	try
-	{	
-
-
-		
-		$appId = $execId;
-
-		/* Experiment input and output data. */
-		$input = new InputDataObjectType();
-		$input->name = "input";
-		$input->value = $inp;		
-		$input->type = DataType::STRING;
-		$exInputs = array($input);		
-		$output = new OutputDataObjectType();
-		$output->name = "output";
-		$output->value = "";
-		$output->type = DataType::STDOUT;
-		$err = new OutputDataObjectType();
-		$err->name = "output_err";
-		$err->value = "";
-		$err->type = DataType::STDERR;
-		$exOutputs = array($output,$err);
-
-		/* Create Experiment: needs to update using unique project ID. */
-		$user = $usrName;
-		$exp_name = $expName;
-		$proj = $projId;
-
-		$experiment = new Experiment();
-		$experiment->projectID = $proj;
-		$experiment->userName = $user;
-		$experiment->name = $exp_name;
-		$experiment->applicationId = $appId;
-		$experiment->experimentInputs = $exInputs;
-		$experiment->experimentOutputs = $exOutputs;
-
-	    $computeResources = $airavataclient->getAvailableAppInterfaceComputeResources($execId);
-	    // echo var_dump($computeResources);
-	    if(isset($computeResources) && !empty($computeResources)){
-	    	foreach ($computeResources as $key => $value) {
-	    		if($value == "localhost"){
-					$cmRST = new ComputationalResourceScheduling();
-					$cmRST->resourceHostId = $key;
-					$cmRST->computationalProjectAccount = "ixxi-2013";
-					$cmRST->nodeCount = 1;
-					$cmRST->numberOfThreads = 1;
-					$cmRST->queueName = "normal";
-					$cmRST->totalCPUCount = 1;
-					$cmRST->wallTimeLimit = 30;
-					$cmRST->jobStartTime = 0;
-					$cmRST->totalPhysicalMemory = 1;
-					$userConfigurationData = new UserConfigurationData();
-					$userConfigurationData->airavataAutoSchedule = 0;
-					$userConfigurationData->overrideManualScheduledParams = 0;
-					$userConfigurationData->computationalResourceScheduling = $cmRST;
-					$experiment->userConfigurationData = $userConfigurationData;
-	    		}
-	    	}
-	    }  
-		$expId = $airavataclient->createExperiment($experiment);
-
-		if ($expId)
-		{
-		    echo var_dump($experiment);
-		    return $expId;
-		}
-		else
-		{
-		    return 0;
-		}
-	}
-	catch (InvalidRequestException $ire)
-	{
-		
-	    print 'InvalidRequestException: ' . $ire->getMessage()."\n";
-	    return -1;
-	}
-	catch (AiravataClientException $ace)
-	{
-	    print 'Airavata System Exception: ' . $ace->getMessage()."\n";
-	    return -2;
-	}
-	catch (AiravataSystemException $ase)
-	{
-	    print 'Airavata System Exception: ' . $ase->getMessage()."\n";
-	    return -3;
-	}
-	$transport->close();
+        if ($expId)
+        {
+            $outputData["ExperimentId"] = $expId;
+        }
+        else
+        {
+            $outputData["error"] = 'Experiment Not Created';
+        }
+    }
+    catch (InvalidRequestException $ire)
+    {
+        $outputData["error"] = 'InvalidRequestException: ' . $ire->getMessage();
+    }
+    catch (AiravataClientException $ace)
+    {
+        $outputData["error"] = 'Airavata System Exception: ' . $ace->getMessage();
+    }
+    catch (AiravataSystemException $ase)
+    {
+        $outputData["error"] = 'Airavata System Exception: ' . $ase->getMessage();
+    }
+    catch(TException $tx)
+    {
+        $outputData["error"] = 'There is some connection problem, please check if airavata is runnig properly and try again later';
+    }
+    catch (\Exception $e)
+    {
+        $outputData["error"] = 'Exception: ' . $e->getMessage();
+    }
+    return json_encode($outputData);
 }
 
 function launchExperiment( $expId){
-	include 'airavata/getAiravataClient.php';
-	// global $airavataclient;
-	// $airavataconfig = parse_ini_file("airavata/airavata-client-properties.ini");
-	$token = $airavataconfig['AIRAVATA_CREDENTIAL_STORE_TOKEN'];
-	// $transport = new TSocket($airavataconfig['AIRAVATA_SERVER'], $airavataconfig['AIRAVATA_PORT']);
-	// $transport->setSendTimeout($airavataconfig['AIRAVATA_TIMEOUT']);
-	// $protocol = new TBinaryProtocol($transport);
-	// $transport->open();
-	// $airavataclient = new AiravataClient($protocol);	
-	try
-	{	  
-	  // echo var_dump($airavataclient);
-	   $airavataclient->launchExperiment($expId, $token);
-	   return 1;
-	}
-	catch (InvalidRequestException $ire)
-	{
-	    return -1;
-	}
-	catch (AiravataClientException $ace)
-	{
-	    return -2;
-	}
-	catch (AiravataSystemException $ase)
-	{
-	    return -3;
-	}
-	catch (ExperimentNotFoundException $enf)
-	{
-	    return -4;
-	}
-	$transport->close();
+    // $airavataconfig = parse_ini_file("airavata-0.15/airavata-client-properties.ini");
+    if(!isset($GLOBALS['AIRAVATA_SERVER'])){
+        getProperties();
+    }
+    $token = $GLOBALS['AIRAVATA_CREDENTIAL_STORE_TOKEN'];
+    $transport = new TSocket($GLOBALS['AIRAVATA_SERVER'], $GLOBALS['AIRAVATA_PORT']);
+    $transport->setSendTimeout($GLOBALS['AIRAVATA_TIMEOUT']);
+    $protocol = new TBinaryProtocol($transport);
+    try
+    {
+        $transport->open();
+        $airavataclient = new AiravataClient($protocol);
+        $airavataclient->launchExperiment($expId, $token);
+        $transport->close();
+        $outputData = array();
+        $outputData["isExperimentLaunched"] = true;
+    }
+    catch (InvalidRequestException $ire)
+    {
+        $outputData["error"] = 'InvalidRequestException: ' . $ire->getMessage();
+    }
+    catch (AiravataClientException $ace)
+    {
+        $outputData["error"] = 'Airavata System Exception: ' . $ace->getMessage();
+    }
+    catch (AiravataSystemException $ase)
+    {
+        $outputData["error"] = 'Airavata System Exception: ' . $ase->getMessage();
+    }
+    catch(TException $tx)
+    {
+        $outputData["error"] = 'There is some connection problem, please check if airavata is runnig properly and try again later';
+    }
+    catch (\Exception $e)
+    {
+        $outputData["error"] = 'Exception: ' . $e->getMessage();
+    }
+    return json_encode($outputData);
 }
 
 function getOutput( $expId)
 {
-	include 'airavata/getAiravataClient.php';
-	// global $airavataclient;
- //    $airavataconfig = parse_ini_file("airavata/airavata-client-properties.ini");
-	// $transport = new TSocket($airavataconfig['AIRAVATA_SERVER'], $airavataconfig['AIRAVATA_PORT']);
-	// $transport->setSendTimeout($airavataconfig['AIRAVATA_TIMEOUT']);
-	// $protocol = new TBinaryProtocol($transport);
-	// $transport->open();
-	// $airavataclient = new AiravataClient($protocol);
-
+    if(!isset($GLOBALS['AIRAVATA_SERVER'])){
+        getProperties();
+    }
+    // $airavataconfig = parse_ini_file("airavata/airavata-client-properties.ini");
+    $transport = new TSocket($GLOBALS['AIRAVATA_SERVER'], $GLOBALS['AIRAVATA_PORT']);
+    $transport->setSendTimeout($GLOBALS['AIRAVATA_TIMEOUT']);
+    $protocol = new TBinaryProtocol($transport);
+    $errors = array(
+     'CANCELED' => "Experiment Cancelled",
+     'SUSPENDED' => "Experiment Suspended",
+     'FAILED' => "Experiment Failed"
+        );
     try
     {
+        $airavataclient = new AiravataClient($protocol);
+        $transport->open();
+        while(($status=get_experiment_status($airavataclient, $expId))!="COMPLETED"){
+            if(isset($errors[$status])){
+              $transport->close();
+              return "{\"error\":\"".$errors[$status]."\"}";
+              exit();
+            }
+            sleep(1);
+        }
         $outputs =  $airavataclient->getExperimentOutputs($expId);
+        $transport->close();
+        $outputData = array();
         if(!empty($outputs[0]->value)){
-			return $outputs[0]->value;	
+            $outputData["output"] = $outputs[0]->value;
         }else {
-			return $outputs[1]->value;	
+            $outputData["error"] = $outputs[1]->value;
         }
 
     }
     catch (InvalidRequestException $ire)
     {
-        echo 'InvalidRequestException!<br><br>' . $ire->getMessage();
-    }
-    catch (ExperimentNotFoundException $enf)
-    {
-        echo 'ExperimentNotFoundException!<br><br>' . $enf->getMessage();
+        $outputData["error"] = 'InvalidRequestException: ' . $ire->getMessage();
     }
     catch (AiravataClientException $ace)
     {
-        echo 'AiravataClientException!<br><br>' . $ace->getMessage();
+        $outputData["error"] = 'Airavata System Exception: ' . $ace->getMessage();
     }
     catch (AiravataSystemException $ase)
     {
-        echo 'AiravataSystemException!<br><br>' . $ase->getMessage();
+        $outputData["error"] = 'Airavata System Exception: ' . $ase->getMessage();
+    }
+    catch(TException $tx)
+    {
+        $outputData["error"] = 'There is some connection problem, please check if airavata is runnig properly and try again later';
+    }
+    catch (ExperimentNotFoundException $enf)
+    {
+        $outputData["error"] = 'ExperimentNotFoundException: ' . $enf->getMessage();
     }
     catch (TTransportException $tte)
     {
-        echo 'TTransportException!<br><br>' . $tte->getMessage();
+        $outputData["error"] = 'TTransportException: ' . $tte->getMessage();
     }
     catch (\Exception $e)
     {
-        echo 'Exception!<br><br>' . $e->getMessage();
+        $outputData["error"] = 'Exception: ' . $e->getMessage();
     }
+    return json_encode($outputData);
 
-	$transport->close();
+
 }
 
-
-// function getOutput( $expId){	
-// 	global $airavataclient;
-// 	// $airavataconfig = parse_ini_file("airavata/airavata-client-properties.ini");
-// 	// $transport = new TSocket($airavataconfig['AIRAVATA_SERVER'], $airavataconfig['AIRAVATA_PORT']);
-// 	// $transport->setSendTimeout($airavataconfig['AIRAVATA_TIMEOUT']);
-// 	// $protocol = new TBinaryProtocol($transport);
-// 	// $transport->open();
-// 	// $airavataclient = new AiravataClient($protocol);
-// 	$outputs = get_experiment_outputs( $expId);
-
-// 	return $outputs[0]->value;	
-// 	var_dump($outputs);
-// }
-
-function get_experiment_status( $expId)
+function get_experiment_status($client, $expId)
 {
-	include 'airavata/getAiravataClient.php';
-	// global $airavataclient;
- //    	$airavataconfig = parse_ini_file("airavata/airavata-client-properties.ini");
-	// $transport = new TSocket($airavataconfig['AIRAVATA_SERVER'], $airavataconfig['AIRAVATA_PORT']);
-	// $transport->setSendTimeout($airavataconfig['AIRAVATA_TIMEOUT']);
-	// $protocol = new TBinaryProtocol($transport);
-	// $transport->open();
-	// $airavataclient = new AiravataClient($protocol);
+        try
+        {
+            $outputData = array();
+            $experimentStatus = $client->getExperimentStatus($expId);
+            return ExperimentState::$__names[$experimentStatus->experimentState];
+            exit();
+        }
+        catch (InvalidRequestException $ire)
+        {
+            $outputData["error"] = 'InvalidRequestException: ' . $ire->getMessage();
+        }
+        catch (AiravataClientException $ace)
+        {
+            $outputData["error"] = 'Airavata System Exception: ' . $ace->getMessage();
+        }
+        catch (AiravataSystemException $ase)
+        {
+            $outputData["error"] = 'Airavata System Exception: ' . $ase->getMessage();
+        }
+        catch(TException $tx)
+        {
+            $outputData["error"] = 'There is some connection problem, please check if airavata is runnig properly and try again later';
+        }
+        catch (ExperimentNotFoundException $enf)
+        {
+            $outputData["error"] = 'ExperimentNotFoundException: ' . $enf->getMessage();
+        }
+        catch (TTransportException $tte)
+        {
+            $outputData["error"] = 'TTransportException: ' . $tte->getMessage();
+        }
+        catch (\Exception $e)
+        {
+            $outputData["error"] = 'Exception: ' . $e->getMessage();
+        }
+        return json_encode($outputData);
 
-	    try
-	    {
-		$experimentStatus = $airavataclient->getExperimentStatus($expId);
-	    }
-	    catch (InvalidRequestException $ire)
-	    {
-		echo 'InvalidRequestException!<br><br>' . $ire->getMessage();
-	    }
-	    catch (ExperimentNotFoundException $enf)
-	    {
-		echo 'ExperimentNotFoundException!<br><br>' . $enf->getMessage();
-	    }
-	    catch (AiravataClientException $ace)
-	    {
-		echo 'AiravataClientException!<br><br>' . $ace->getMessage();
-	    }
-	    catch (AiravataSystemException $ase)
-	    {
-		echo 'AiravataSystemException!<br><br>' . $ase->getMessage();
-	    }
-	    catch (\Exception $e)
-	    {
-		echo 'Exception!<br><br>' . $e->getMessage();
-	    }
-
-	    return ExperimentState::$__names[$experimentStatus->experimentState];
-	    $transport->close();
 }
-
-
-// function getExperimentStatus( $expId){
-// 	$airavataconfig = parse_ini_file("airavata/airavata-client-properties.ini");
-// 	$transport = new TSocket($airavataconfig['AIRAVATA_SERVER'], $airavataconfig['AIRAVATA_PORT']);
-// 	$transport->setSendTimeout($airavataconfig['AIRAVATA_TIMEOUT']);
-// 	$protocol = new TBinaryProtocol($transport);
-// 	$transport->open();
-// 	$airavataclient = new AiravataClient($protocol);
-// 	$experimentStatusString = get_experiment_status( $expId);
-// 	return $experimentStatusString;
-// 	$transport->close();
-// }
 
 ?>

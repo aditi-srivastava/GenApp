@@ -1,4 +1,5 @@
 <?php
+
 namespace Airavata\Client;
 
 $GLOBALS['THRIFT_ROOT'] = 'Thrift/';

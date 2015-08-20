@@ -4,20 +4,32 @@ include("airavata.php");
 if ($argc == 3) {
         $appId = $argv[1];
         $json = $argv[2];
-        $projId=createProject("admin", $appId);
-        // echo var_dump($projId);
-        $expId=createExperiment("admin", "exp5", $projId, $appId, $json); 
-		// $expId =  "exp5_e7b826cf-a429-4b3e-b519-28d859fe4b64";
-		// echo var_dump($expId);
-		$res = launchExperiment($expId);
-		// echo var_dump($res); 
-		while(($status=get_experiment_status($expId))!="COMPLETED"){    
-			// echo "$status\n";
-			sleep(1);
-		}
-		echo getOutput($expId);
-
+        $projId=createProject("test");
+        $projId = json_decode($projId);
+        if(isset($projId->ProjectId)){
+            $expId=createExperiment("exp5", $projId->ProjectId, $appId, $json);
+            $expId = json_decode($expId);
+            if(isset($expId->ExperimentId)){
+                $launch = launchExperiment($expId->ExperimentId);
+                $launch = json_decode($launch);
+                if(isset($launch->isExperimentLaunched)){
+                    $results = getOutput($expId->ExperimentId);
+                    $results = json_decode($results);    
+                    if(isset($results->output)){
+                        echo $results->output;
+                    }else{
+                        echo $results->error;
+                    }
+                }else{
+                       echo  "{\"error\":\"".$launch->error."\"}";
+                }
+            }else{
+                   echo  "{\"error\":\"".$expId->error."\"}";
+            }
+        }else{
+            echo  "{\"error\":\"".$projId->error."\"}";
+        }
     } else {
        echo  "{\"error\":\"insufficient arguments\"}";
-	}
+    }
 ?>
