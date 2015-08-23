@@ -66,7 +66,7 @@ public class HandleResult {
  
     }
     
-    public static JSONObject getInputJSON(VBox input){
+   public static JSONObject getInputJSON(VBox input){
         JSONObject json = new JSONObject();
         Iterator<Node> inputIt = input.getChildren().iterator();
         while(inputIt.hasNext()){
@@ -75,8 +75,13 @@ public class HandleResult {
             HBox inp = (HBox) node;
             if(inp.getChildren().size() > 1){
             Node nd = inp.getChildren().get(1);
-            if(nd.getId() != "reset" && nd.getId() != "submit")
-            json.put(nd.getId(), Input.getInput(nd));
+                if(nd.getId() != "reset" && nd.getId() != "submit")
+                json.put(nd.getId(), Input.getInput(nd));
+            }else if(inp.getChildren().size() == 1){
+                Node nd = inp.getChildren().get(0);
+                if(nd instanceof VBox){
+                    json.putAll(getInputJSON((VBox) nd));
+                }
             }
           }
             

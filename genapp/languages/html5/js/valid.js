@@ -167,5 +167,3 @@ __~debug:valid{   console.log( "ga.valid.checksubmit( " + module + " )" );}
    }
    return ok;
 }
-          
-   

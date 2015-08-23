@@ -36,10 +36,16 @@ if ( $doc = $m->__application__->license->findOne( array( "name" => $_SESSION[ $
 }
 
 if ( strlen( $_REQUEST[ "_logon" ] ) ) {
-   $appconfig = json_decode( file_get_contents( "__appconfig__" ) );
-   if ( isset( $appconfig->admin ) && in_array( $_REQUEST[ "_logon" ], $appconfig->admin ) ) {
-       $results[ "hasadmin" ] = true;
-   }
+    $appconfig = json_decode( file_get_contents( "__appconfig__" ) );
+    if ( isset( $appconfig->restricted ) ) {
+        $results[ "restricted" ] = [];
+        foreach ( $appconfig->restricted as $k => $v ) {
+            if ( in_array( $_REQUEST[ "_logon" ], $v ) ) {
+                array_push( $results[ "restricted" ],  $k );
+            }
+        }
+    }
+    __~debug:restricted{error_log( "sys_license " . print_r( json_encode( $results ), true ) . "\n", 3, "/tmp/mylog" );}
 }
 
 echo (json_encode($results));

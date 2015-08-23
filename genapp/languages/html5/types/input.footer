@@ -96,6 +96,11 @@ function msg___moduleid__ ( id, data )
 $( "#__moduleid___submit" ).click( function( e ) {
    e.preventDefault();
    e.returnValue = false;
+   __~captcha{ga.captcha( do___moduleid___submit, $(this) ); return false;}
+   return do___moduleid___submit( $(this) );
+});
+
+function do___moduleid___submit( $form ) {
 
    var $ok = 0;
    __~nojobcontrol{   $ok = 1;}
@@ -113,7 +118,14 @@ __~debug:job{   console.log( "you clicked" );}
        return false;
    }
 
-   var $form = $(this);
+   if ( ga.specproj.data.length ) {
+      if ( $( "#_state" ).data( '_logon' ) &&
+           $( "#_state" ).data( '_logon' ).length ) {
+          $( "#sel_project" ).html( ga.specproj.gname() );
+          $( "#_state" ).data( '_project', ga.specproj.gname() );
+          __~debug:specproj{console.log( "setting specproject" );}
+      }
+   }  
 
    $.ajax({
        type: 'get'
@@ -291,7 +303,7 @@ __~debug:job{              console.log( "complete but locked" );}
           }
        }
    });
-}); 
+} 
 
 $( "#__moduleid___reset" ).click( function() {
     __~debug:valuenx{ga.valuen.restore( "__moduleid__" ); return false;}

@@ -12,4 +12,5 @@ __moduleid___done_eval = "";
 _jmol_info = {};
 // jmol = "jmol";
 ga.pull.clearPull();
+ga.specproj.clear();
 $('#__moduleid__').on("keyup keypress", function(e) { var code = e.keyCode || e.which;  if (code  == 13) { e.preventDefault(); return false; }});

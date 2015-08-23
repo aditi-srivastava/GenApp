@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.airavata.api.Airavata;
 import org.apache.airavata.api.client.AiravataClientFactory;
@@ -21,6 +22,7 @@ import org.apache.airavata.model.workspace.experiment.ExperimentState;
 import org.apache.airavata.model.workspace.experiment.ExperimentStatus;
 import org.apache.airavata.model.workspace.experiment.UserConfigurationData;
 import org.apache.thrift.TException;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import util.AppConfig;
@@ -78,16 +80,20 @@ public class ExperimentUtils {
                ExperimentModelUtil.createSimpleExperiment(projectId, OWNER, expName, "GenApp Module Experiment", appId, exInputs);
        genAppExperiment.setExperimentOutputs(exOut);
        Map<String, String> cmrf = airavataClient.getAvailableAppInterfaceComputeResources(appId);
-       if(cmrf.containsValue(THRIFT_SERVER_HOST)){
-           ComputationalResourceScheduling scheduling = ExperimentModelUtil.createComputationResourceScheduling(
-                   cmrf.get(THRIFT_SERVER_HOST), 1, 1, 1, "normal", 30, 0, 1, PROJECT_ACCOUNT_NAME);
-        scheduling.setResourceHostId(cmrf.get(THRIFT_SERVER_HOST));
-        UserConfigurationData userConfigurationData = new UserConfigurationData();
-        userConfigurationData.setAiravataAutoSchedule(false);
-        userConfigurationData.setOverrideManualScheduledParams(false);
-        userConfigurationData.setComputationalResourceScheduling(scheduling);
-        genAppExperiment.setUserConfigurationData(userConfigurationData);
-       }
+       JSONObject cmrs = AppConfig.getComputeResource();
+           String host = (String) cmrs.get("host");
+           String hostId = getKeyFromValue(cmrf, host);
+           if(cmrf.containsValue(host)){
+               ComputationalResourceScheduling scheduling = ExperimentModelUtil.createComputationResourceScheduling(
+                       hostId, 1, 1, 1, "normal", 30, 0, 1, PROJECT_ACCOUNT_NAME);
+            scheduling.setResourceHostId(hostId);
+            UserConfigurationData userConfigurationData = new UserConfigurationData();
+            userConfigurationData.setAiravataAutoSchedule(false);
+            userConfigurationData.setOverrideManualScheduledParams(false);
+            userConfigurationData.setComputationalResourceScheduling(scheduling);
+            genAppExperiment.setUserConfigurationData(userConfigurationData);
+           }
+       
        return airavataClient.createExperiment(DEFAULT_GATEWAY, genAppExperiment);
    }
    
@@ -111,9 +117,22 @@ public class ExperimentUtils {
        return airavataClient.getExperimentOutputs(expId).get(0).getValue();
    }
    
-   private ExperimentState getExperimentState(String expId) throws TException{
+   public ExperimentState getExperimentState(String expId) throws TException{
        ExperimentStatus status = airavataClient.getExperimentStatus(expId);
        return status.getExperimentState();
+   }
+   
+   private String getKeyFromValue(Map<String, String> map, String value){
+       String key = null;
+       Iterator<Entry<String, String>> it = map.entrySet().iterator();
+       while(it.hasNext()){
+           Entry<String, String> set = it.next();
+           if(set.getValue().equals(value)){
+               key = set.getKey();
+               break;
+           }
+       }
+       return key;
    }
 
 }

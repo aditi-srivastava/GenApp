@@ -67,6 +67,18 @@ public class AppConfig {
         return computeResource;
     }
     
-    
+    public static JSONArray getComputeResourceArray(){
+        JSONArray computeResource = null;
+        JSONObject config = getAppConfig();
+        String resource = (String) config.get("resourcedefault");
+        if(resource.equals("airavata")){
+            JSONObject jsonResource = (JSONObject) config.get("resources");
+            if(jsonResource.containsKey(resource)){
+                JSONObject airavata = (JSONObject) jsonResource.get(resource);
+                computeResource = (JSONArray) airavata.get("resources");
+            }
+        }
+        return computeResource;
+    }
 
 }

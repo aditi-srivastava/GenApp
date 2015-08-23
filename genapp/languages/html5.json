@@ -209,6 +209,20 @@
                    }
                    ,{
                     "frequency"  : "once",
+                    "output"     : "ajax/sys_config/sys_captcha.php",
+                    "inputs"     : [ 
+                                    { "sys/sys_captcha.php" : "once" }
+                                   ]
+                   }
+                   ,{
+                    "frequency"  : "once",
+                    "output"     : "ajax/sys_config/sys_captcha_verify.php",
+                    "inputs"     : [ 
+                                    { "sys/sys_captcha_verify.php" : "once" }
+                                   ]
+                   }
+                   ,{
+                    "frequency"  : "once",
                     "output"     : "util/test_mail.php",
                     "setexecutable" : "true",
                     "inputs"     : [ 
@@ -269,6 +283,7 @@
                                     ,{ "js/sync.js"             : "once" }
                                     ,{ "js/valuen.js"           : "once" }
                                     ,{ "js/license.js"          : "once" }
+                                    ,{ "js/captcha.js"          : "once" }
                                    ]
                    }
                    ,{

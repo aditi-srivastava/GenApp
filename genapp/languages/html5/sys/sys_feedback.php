@@ -75,7 +75,7 @@ $data =
 $_REQUEST[ '_eventlog' ] . "\n"
 ;
 
-$ats = array( "json input" => "_args", "command" => "_cmds_", "output" => "_stdout_", "error output" =>  "_stderr_" ); 
+$ats = array( "json input" => "_args_", "command" => "_cmds_", "output" => "_stdout_", "error output" =>  "_stderr_" ); 
 
 $attach = array();
 $attachinfo = "";

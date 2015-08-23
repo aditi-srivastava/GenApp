@@ -12,6 +12,7 @@ function getProperties(){
   $GLOBALS["AIRAVATA_LOGIN"] = $properties->login;
   $GLOBALS["AIRAVATA_PROJECT_ACCOUNT"] = $properties->projectAccount;
   $GLOBALS["AIRAVATA_CREDENTIAL_STORE_TOKEN"] = $properties->credentialStoreToken;
+  $GLOBALS["COMPUTE_RESOURCE_HOST"] = $appjson->resources->airavata->resources[0]->host;
 
 }
 

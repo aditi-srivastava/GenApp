@@ -34,13 +34,15 @@ $appconfig = json_decode( file_get_contents( "__appconfig__" ) );
 
 if ( !isset( $appconfig->messaging->zmqhostip ) ||
      !isset( $appconfig->messaging->zmqport )   || 
-     !isset( $appconfig->admin ) ) {
+     !isset( $appconfig->restricted )           ||
+     !isset( $appconfig->restricted->admin )           
+     ) {
     $results[ "error" ] = "appconfig.json missing zmq or admin info";
     echo (json_encode($results));
     exit();
 }    
 
-if ( !in_array( $_REQUEST[ '_logon' ], $appconfig->admin ) ) {
+if ( !in_array( $_REQUEST[ '_logon' ], $appconfig->restricted->admin ) ) {
     $results[ "error" ] = "not an administrator";
     echo (json_encode($results));
     exit();

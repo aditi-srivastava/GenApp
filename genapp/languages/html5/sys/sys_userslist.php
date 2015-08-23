@@ -26,13 +26,19 @@ if ( !isset( $_REQUEST[ '_logon' ] ) ) {
 
 $appconfig = json_decode( file_get_contents( "__appconfig__" ) );
 
-if ( !isset( $appconfig->admin ) ) {
-    $results[ "error" ] = "appconfig.json no administrators defined";
+if ( !isset( $appconfig->restricted ) ) {
+    $results[ "error" ] = "appconfig.json no restrictions defined";
     echo (json_encode($results));
     exit();
 }    
 
-if ( !in_array( $_REQUEST[ '_logon' ], $appconfig->admin ) ) {
+if ( !isset( $appconfig->restricted->admin ) ) {
+    $results[ "error" ] = "appconfig.json no adminstrators defined";
+    echo (json_encode($results));
+    exit();
+}    
+
+if ( !in_array( $_REQUEST[ '_logon' ], $appconfig->restricted->admin ) ) {
     $results[ "error" ] = "not an administrator";
     echo (json_encode($results));
     exit();
@@ -108,7 +114,7 @@ function get_userinfo( $error_json_exit = false ) {
                ,"registered"         => isset( $v["registered"] ) ? date( "Y M d H:i T",$v["registered"]->sec ) : ""
                ,"jobs-not-removed"   => $use_db->__application__->jobs->count( array( "user" => $name ) )
                ,"running"            => isset( $runcount[ $name ] ) ? $runcount[ $name ] : 0
-               ,"admin"              => in_array( $v[ 'name' ], $appconfig->admin ) ? "yes" : ""
+               ,"admin"              => in_array( $v[ 'name' ], $appconfig->restricted->admin ) ? "yes" : ""
            );
    }
    return true;

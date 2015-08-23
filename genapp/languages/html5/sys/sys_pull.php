@@ -70,7 +70,7 @@ if ( $_REQUEST[ '_logon' ] != $_SESSION[ $window ][ 'logon' ] )
    date_default_timezone_set( 'UTC' );
    $json = json_decode( file_get_contents( "__appconfig__" ) );
 
-   mymail( $json->mail->admin, 'security alert __application__', "possible security breach attempt on __application__\n" .
+   mymail( $json->mail->admin, 'security alert __application__', "session timeout or possible security breach attempt on __application__\n" .
            'requestuser: ' . $insert[ 'requestuser' ] . "\n" .
            'sessionuser: ' . $insert[ 'sessionuser' ] . "\n" .
            'remoteip:    ' . $insert[ 'remoteip' ] . "\n" .

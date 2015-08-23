@@ -94,7 +94,7 @@ function createProject($projectName){
     }
     catch(TException $tx)
     {
-        $outputData["error"] = 'There is some connection problem, please check if airavata is runnig properly and try again later';
+        $outputData["error"] = 'Exception: ' . $tx->getMessage();
     }
     catch (\Exception $e)
     {
@@ -109,6 +109,7 @@ function createExperiment($expName, $projId, $appId, $inp){
     // }
     // $airavataconfig = parse_ini_file("airavata-0.15/airavata-client-properties.ini");
     $transport = new TSocket($GLOBALS['AIRAVATA_SERVER'], $GLOBALS['AIRAVATA_PORT']);
+    $transport->setRecvTimeout($GLOBALS['AIRAVATA_TIMEOUT']);
     $transport->setSendTimeout($GLOBALS['AIRAVATA_TIMEOUT']);
     $protocol = new TBinaryProtocol($transport);
     try
@@ -134,6 +135,7 @@ function createExperiment($expName, $projId, $appId, $inp){
         /* Create Experiment: needs to update using unique project ID. */
         $user = $GLOBALS['AIRAVATA_LOGIN'];
         $host = $GLOBALS['AIRAVATA_SERVER'];
+        $cmrHost = $GLOBALS["COMPUTE_RESOURCE_HOST"];
         // $hostname = $airavataconfig['AIRAVATA_SERVER_ALIAS'];
         $gatewayId = $GLOBALS['AIRAVATA_GATEWAY'];
         $proAccount = $GLOBALS['AIRAVATA_PROJECT_ACCOUNT'];
@@ -150,7 +152,7 @@ function createExperiment($expName, $projId, $appId, $inp){
         $computeResources = $airavataclient->getAvailableAppInterfaceComputeResources($appId);
         if(isset($computeResources) && !empty($computeResources)){
             foreach ($computeResources as $key => $value) {
-                if($value == $host || $value == $hostname){
+                if($value == $cmrHost){
                     $cmRST = new ComputationalResourceScheduling();
                     $cmRST->resourceHostId = $key;
                     $cmRST->computationalProjectAccount = $proAccount;
@@ -196,7 +198,7 @@ function createExperiment($expName, $projId, $appId, $inp){
     }
     catch(TException $tx)
     {
-        $outputData["error"] = 'There is some connection problem, please check if airavata is runnig properly and try again later';
+        $outputData["error"] = 'Exception: ' . $tx->getMessage();
     }
     catch (\Exception $e)
     {
@@ -213,6 +215,7 @@ function launchExperiment( $expId){
     $token = $GLOBALS['AIRAVATA_CREDENTIAL_STORE_TOKEN'];
     $transport = new TSocket($GLOBALS['AIRAVATA_SERVER'], $GLOBALS['AIRAVATA_PORT']);
     $transport->setSendTimeout($GLOBALS['AIRAVATA_TIMEOUT']);
+    $transport->setRecvTimeout($GLOBALS['AIRAVATA_TIMEOUT']);
     $protocol = new TBinaryProtocol($transport);
     try
     {
@@ -237,7 +240,7 @@ function launchExperiment( $expId){
     }
     catch(TException $tx)
     {
-        $outputData["error"] = 'There is some connection problem, please check if airavata is runnig properly and try again later';
+        $outputData["error"] = 'Exception: ' . $tx->getMessage();
     }
     catch (\Exception $e)
     {
@@ -296,7 +299,7 @@ function getOutput( $expId)
     }
     catch(TException $tx)
     {
-        $outputData["error"] = 'There is some connection problem, please check if airavata is runnig properly and try again later';
+        $outputData["error"] = 'Exception: ' . $tx->getMessage();
     }
     catch (ExperimentNotFoundException $enf)
     {
@@ -338,7 +341,7 @@ function get_experiment_status($client, $expId)
         }
         catch(TException $tx)
         {
-            $outputData["error"] = 'There is some connection problem, please check if airavata is runnig properly and try again later';
+            $outputData["error"] = 'Exception: ' . $tx->getMessage();
         }
         catch (ExperimentNotFoundException $enf)
         {

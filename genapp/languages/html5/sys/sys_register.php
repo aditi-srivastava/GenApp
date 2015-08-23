@@ -12,6 +12,14 @@ if ( !sizeof( $_REQUEST ) )
     exit();
 }
 
+if ( !isset( $_REQUEST[ "_window" ] ) ) {
+    $results[ 'error' ] = "Error in call";
+    echo json_encode( $results );
+    exit();
+}
+
+$window = $_REQUEST[ "_window" ];
+
 if ( !is_string( $_REQUEST[ 'userid' ] ) || 
    strlen( $_REQUEST[ 'userid' ] ) < 3 ||
    strlen( $_REQUEST[ 'userid' ] ) > 30 ||
@@ -49,6 +57,9 @@ if ( !is_string( $email ) ||
     exit();
 }
 
+date_default_timezone_set( 'UTC' );
+$mindate = new MongoDate();
+$mindate->sec -= 3 * 60;
 
 // connect
 try {
@@ -59,6 +70,23 @@ try {
     exit();
 }
   
+if ( __~enablecaptcha{1}0 ) {
+    // check for valid captcha
+    $coll = $m->__application__->captcha;
+    if ( !$doc = $coll->findOne(
+              array( 
+                  "window" => $window, 
+                  "success" => 1,
+                  "time" => array( '$gte' => $mindate 
+                  ) ) ) ) {
+        $coll->remove( array( "window" => $window ) );
+        $results[ "error" ] = "Internal error 5401";
+        echo (json_encode($results));
+        exit();
+    }
+    $coll->remove( array( "window" => $window ) );
+}
+
 $coll = $m->__application__->users;
 
 if ( $doc = $coll->findOne( array( "name" => $_REQUEST[ 'userid' ] ) ) )
@@ -75,7 +103,6 @@ if ( PHP_VERSION_ID < 50500 )
   $pw = password_hash( $_REQUEST[ 'password1' ], PASSWORD_DEFAULT );
 }
 
-date_default_timezone_set( 'UTC' );
 
 try {
     $coll->insert( array( "name" => $_REQUEST[ 'userid' ], "password" => $pw, "email" => $email, "registered" => new MongoDate() )__~mongojournal{, array("j" => true )});

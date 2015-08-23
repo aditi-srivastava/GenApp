@@ -52,6 +52,8 @@ if ( !isset( $_REQUEST[ '_uuid' ] ) )
 
 $getinput = isset( $_REQUEST[ '_getinput' ] ) && $_REQUEST[ '_getinput' ] == "true";
 
+__~debug:getinput{error_log( "in results.php getinput is " . ( $getinput ? "true" : "false" ) . "\n", 3, "/tmp/mylog" );}
+
 $GLOBALS[ 'logon' ] = isset( $_SESSION[ $window ][ 'logon' ] ) ? $_SESSION[ $window ][ 'logon' ] : 'not logged in';
 require_once "joblog.php";
 
@@ -83,21 +85,54 @@ if ( $GLOBALS[ "getmenumodulestatus" ] != 'finished' &&
      $GLOBALS[ "getmenumodulestatus" ] != 'cancelled' &&
      $GLOBALS[ "getmenumodulestatus" ] != 'failed' )
 {
-   if ( isset( $_REQUEST[ '_getlastmsg' ] ) &&
-       $_REQUEST[ '_getlastmsg' ] == 1 )
-   {
-__~debug:job{      $results[ "notice_lastmsg" ] = 'getlastmsg is on';}
-      if ( cached_msg( $id ) )
-      {
-         echo( $GLOBALS[ 'cached_msg' ] );
-         exit();
-      }
-   }
+    __~debug:getinput{error_log( "in results.php running status\n", 3, "/tmp/mylog" );}
+    $use_cached_msg = false;
+    if ( isset( $_REQUEST[ '_getlastmsg' ] ) &&
+         $_REQUEST[ '_getlastmsg' ] == 1 ) {
+        __~debug:job{$results[ "notice_lastmsg" ] = 'getlastmsg is on';}
+        if ( cached_msg( $id ) ) {
+            $use_cached_msg = true;
+            __~debug:getinput{error_log( "in results.php use_cached_msg set true\n", 3, "/tmp/mylog" );}
+        }
+    }
 
-   $results[ '_status' ] = 'running';
-__~debug:job{   $results[ 'jobstatus' ] = 'running';}
-   echo (json_encode($results));
-   exit();
+    if ( $getinput ) {
+        __~debug:getinput{error_log( "in results.php getinput is set in running status\n", 3, "/tmp/mylog" );}
+        $getinputerror = false;
+        ob_start();
+        if ( !is_file("$logdir/_input_$id") || FALSE === ( $getinputdata = file_get_contents( "$logdir/_input_$id" ) ) ) {
+            $cont = ob_get_contents();
+            ob_end_clean();
+            $getinputerror    = true;
+            $getinputerrormsg = "$logdir/_input_$id error $cont";
+        }
+        ob_end_clean();
+        if ( $use_cached_msg ) {
+            __~debug:getinput{error_log( "in results.php getinput setting results to cached_msg\n", 3, "/tmp/mylog" );}
+            $results = json_decode( $GLOBALS[ 'cached_msg' ], true );
+        }
+        if ( $getinputerror ) {
+            $results[ "_getinputerror" ] = $getinputerrormsg;
+        } else {
+            $results[ "_getinput" ] = json_decode( $getinputdata );
+        }
+        if ( $use_cached_msg ) {
+            __~debug:getinput{error_log( "in results.php exiting with input and cached_msg\n", 3, "/tmp/mylog" );}
+            echo (json_encode($results));
+            exit();
+        }               
+    }   
+
+    if ( $use_cached_msg ) {
+        __~debug:getinput{error_log( "in results.php exiting with cached_msg\n", 3, "/tmp/mylog" );}
+        echo( $GLOBALS[ 'cached_msg' ] );
+        exit();
+    }
+
+    $results[ '_status' ] = 'running';
+    __~debug:job{$results[ 'jobstatus' ] = 'running';}
+    echo (json_encode($results));
+    exit();
 }
 
 $wascancelled = $GLOBALS[ "getmenumodulestatus" ] == 'cancelled';
@@ -144,6 +179,7 @@ if ( !$wascancelled ) {
 
 if ( $getinput ) {
     $getinputerror = false;
+    ob_start();
     if ( !is_file("$logdir/_input_$id") || FALSE === ( $getinputdata = file_get_contents( "$logdir/_input_$id" ) ) )
     {
         $cont = ob_get_contents();
@@ -213,9 +249,9 @@ if ( !$wascancelled && $test_json == NULL ) {
    }
    $test_json[ '_status' ] = $wascancelled ? 'cancelled' : 'complete';
    $test_json[ '_fs_refresh' ] = $results[ "_fs_refresh" ];
-__~debug:job{    $test_json[ 'hidude' ] = $test_json[ '_status' ];}
+   __~debug:job{$test_json[ 'hidude' ] = $test_json[ '_status' ];}
    
-__~debug:basemylog{    error_log( "result to return\n" . print_r( $test_json, true ) . "\n", 3, "/tmp/mylog" );}
+   __~debug:basemylog{error_log( "result to return\n" . print_r( $test_json, true ) . "\n", 3, "/tmp/mylog" );}
    echo json_encode( $test_json );
    exit;
 }

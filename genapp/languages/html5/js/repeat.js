@@ -124,6 +124,7 @@ ga.repeat.children = function( mod, id, result ) {
 
 ga.repeat.change = function( mod, id, init ) {
     var val,
+    child_repeaters = [],
     hid = "#" + id,
     jqhid = $( hid ),
     children,
@@ -184,9 +185,12 @@ ga.repeat.change = function( mod, id, init ) {
             for ( i in children ) {
                 add_html += ga.repeat.data[ mod ].repeat[ i ].html;
                 add_eval += ga.repeat.data[ mod ].repeat[ i ].eval;
-                if ( ga.repeat.data[ mod ].repeater[ i ] &&
-                     ga.repeat.data[ mod ].repeater[ i ].value ) {
-                    delete ga.repeat.data[ mod ].repeater[ i ].value;
+                if ( ga.repeat.data[ mod ].repeater[ i ] ) {
+                    __~debug:repeat{console.log( "child repeater " + i );}
+                    child_repeaters.push( i );
+                    if ( ga.repeat.data[ mod ].repeater[ i ].value ) {
+                        delete ga.repeat.data[ mod ].repeater[ i ].value;
+                    }
                 }
             }
         }
@@ -200,9 +204,12 @@ ga.repeat.change = function( mod, id, init ) {
                 __~debug:repeat{console.log( " j " + j + " i " + i + " eval " + ga.repeat.data[ mod ].repeat[ i ].evalr );}
                 add_html += ga.repeat.data[ mod ].repeat[ i ].htmlr.replace( /%%id%%/g, i + "-" + j ).replace( "%%label%%", "[" + j + "]" );
                 add_eval += ga.repeat.data[ mod ].repeat[ i ].evalr.replace( /%%id%%/g, i + "-" + j );
-                if ( ga.repeat.data[ mod ].repeater[ i ] &&
-                     ga.repeat.data[ mod ].repeater[ i ].value ) {
-                    delete ga.repeat.data[ mod ].repeater[ i ].value;
+                if ( ga.repeat.data[ mod ].repeater[ i ] ) {
+                    __~debug:repeat{console.log( "child repeater " + i );}
+                    child_repeaters.push( i );
+                    if ( ga.repeat.data[ mod ].repeater[ i ].value ) {
+                        delete ga.repeat.data[ mod ].repeater[ i ].value;
+                    }
                 }
             }
         }
@@ -218,9 +225,12 @@ ga.repeat.change = function( mod, id, init ) {
         for ( i in children ) {
             add_html += ga.repeat.data[ mod ].repeat[ i ].html;
             add_eval += ga.repeat.data[ mod ].repeat[ i ].eval;
-            if ( ga.repeat.data[ mod ].repeater[ i ] &&
-                 ga.repeat.data[ mod ].repeater[ i ].value ) {
-                delete ga.repeat.data[ mod ].repeater[ i ].value;
+            if ( ga.repeat.data[ mod ].repeater[ i ] ) {
+                __~debug:repeat{console.log( "child repeater " + i );}
+                child_repeaters.push( i );
+                if ( ga.repeat.data[ mod ].repeater[ i ].value ) {
+                    delete ga.repeat.data[ mod ].repeater[ i ].value;
+                }
             }
         }
         break;
@@ -231,6 +241,11 @@ ga.repeat.change = function( mod, id, init ) {
         break;
     }
 
+    if ( !/^<tr>/.test( add_html ) &&
+         /<\/tr>$/.test( add_html ) ) {
+        add_html = "<tr>" + add_html;
+    }
+
     __~debug:repeat{console.log( "ga.repeat.change( " + mod + " , " + id + " ) add_html " + add_html );}
     __~debug:repeat{console.log( "ga.repeat.change( " + mod + " , " + id + " ) add_eval " + add_eval );}
     __~debug:repeat{console.log( "ga.repeat.change( " + mod + " , " + id + " ) target tag " + hid + "-repeater" );}
@@ -239,5 +254,11 @@ ga.repeat.change = function( mod, id, init ) {
     eval( add_eval );
 
     ga.repeat.data[ mod ].repeater[ id ].value = val;
+
+    for ( i = 0 ; i < child_repeaters.length; ++i ) {
+        __~debug:repeat{console.log( "ga.repeat.change( " + mod + " , " + id + " ) child_repeater " + child_repeaters[ i ] );}
+        ga.repeat.change( mod, child_repeaters[ i ], init );
+    }
+
     resetHoverHelp();
 }

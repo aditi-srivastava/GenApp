@@ -408,4 +408,3 @@ ga.valuen.reset = function() {
     ga.valuen.dflt.html = {};
     ga.valuen.lastload = "";
 }    
-

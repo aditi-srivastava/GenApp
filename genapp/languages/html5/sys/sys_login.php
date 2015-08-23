@@ -173,7 +173,11 @@ if ( $loginok == 1 )
    if ( isset( $_REQUEST[ 'forgotpassword' ] ) &&
         $_REQUEST[ 'forgotpassword' ] == "on" )
    {
-      $email = filter_var( $doc[ 'email' ], FILTER_SANITIZE_EMAIL );
+      $doc = $coll->findOne( array( "name" => $userid ) );
+
+      if ( isset( $doc[ 'email' ] ) ) {
+          $email = filter_var( $doc[ 'email' ], FILTER_SANITIZE_EMAIL );
+      }
 
       if ( !is_string( $email ) || 
            !strlen( $email ) ||

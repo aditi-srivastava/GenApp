@@ -19,12 +19,16 @@ ga.data.update = function( mod, data, msging_f, msg_id ) {
         hmod_out_msgs       = hmod_out + "_" + "msgs",
         jqhmod_out_msgs     = $( hmod_out_msgs ),
         htag,
+        jqhtag,
         savekey,
         tlink,
+        thtml,
+        t,
         match;
 
 __~debug:data{    console.log( "ga.data.update( " + mod + " , " + data + " )" );}
 __~debug:data{    console.log( "ga.data.update() hmod_out_msgs " + hmod_out_msgs );} 
+__~debug:getinput{    console.log( "ga.data.update() hmod_out_msgs " + hmod_out_msgs );} 
 
     if ( msging_f ) {
 __~debug:data{    console.log( "ga.data.update() msging_f defined" );}
@@ -33,7 +37,9 @@ __~debug:data{    console.log( "ga.data.update() msging_f defined" );}
     }
 
     $.each(data, function(k, v) {
-__~debug:data{    console.log( "ga.data.update() k " + k + " v " + v );}
+        __~debug:data{console.log( "ga.data.update() k " + k + " v " + v );}
+        __~debug:getinput{if ( /^_getinput/.test( k ) ) {console.log( "ga.data.update, found _getinput" );}}
+
         match = jqmod_out.find( "#" + k );
         if ( match.length )
         {
@@ -62,6 +68,10 @@ __~debug:plottwod{                console.log( "ga.data.update v.data is " + v.d
                 savekey = mod_out + ":#" + k + ":last_value";
                 _jmol_info[ k ].script =
                     'set background [' + ga.colors.background + ']; set zoomlarge false;set echo top center;echo loading ' + v.split( '/' ).pop() + ';refresh;load "' + v + '";';
+                if ( ga.set( mod + ":jsmoladd" ) ) {
+                    _jmol_info[ k ].script += ga.set( mod + ":jsmoladd" );
+                }
+                    __~debug:jsmol{console.log( "jsmol script is " + _jmol_info[ k ].script );}
                 //                               Jmol.getApplet("jmol", _jmol_info[ k ]);
 __~debug:values{        console.log( "ga.data.update() atomic structure jmol script before: " + _jmol_info[ k ].script );}
                 $( "#global_data" ).data( savekey , _jmol_info[ k ].script ); 
@@ -75,6 +85,20 @@ __~debug:values{        console.log( "ga.data.update() atomic structure jmol scr
             case "div" :  
                 match.html( v );
                 break;
+            case "video" : 
+                jqhtag = $( "#" + k );
+                thtml = "<video ";
+                if ( jqhtag.attr( "data-width" ) ) {
+                    thtml += ' width="' +  jqhtag.attr( "data-width" ) + '"';
+                }
+                if ( jqhtag.attr( "data-height" ) ) {
+                    thtml += ' height="' +  jqhtag.attr( "data-height" ) + '"';
+                }
+                thtml += ' controls>';
+                thtml += '<source src="' + v +'.mp4" type="video/mp4" /><source src="' + v +'.webm" type="video/webm" />';
+                thtml += '</video>';
+                __~debug:video{console.log( "video: thtml " + thtml );}
+                jqhtag.html( thtml );
             case "filelink" : 
                 tlink = "<a href=\"" + v + "\" target=\"_blank\">" + v.split( '/' ).pop() + "</a>";
                 savekey = mod_out + ":#" + k + ":last_value";

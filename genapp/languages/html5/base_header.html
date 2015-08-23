@@ -77,6 +77,8 @@ td {
 }
 
 __~footersize{footer { position: fixed; left: 0; bottom: 0; height: __footersize__; width: 100%; background: rgb( __background_color_rgb__ ); z-index:50;}}
+.logo { position: fixed; bottom: 0px; right: 0; background: rgb( __background_color_rgb__ ); z-index:51;}
+.logo img { height:calc( __footersize__ / 1.6 ) }
 
 #tab_feedback {
      position: fixed;
@@ -560,6 +562,10 @@ font-size: 2em;
 <div id="global_data"> </div>
 <div id="_state"> </div>
 <script> 
+if ( 10 != __~enablecaptcha{1}0 ) {
+   ga.captcha = function( cb, form ) { return cb( form ); }
+}
+
 ga.colors({
   background : "__background_color_rgb__"
   ,text       : "__text_color_rgb__" 
@@ -597,6 +603,12 @@ __~debug:ws{   console.log( 'setMsging trying new session' );}
 __~debug:ws{          console.log( 'setMsging: connection established' );}
           ga.event( "global", "ws messaging", "connection established" );
           $( '#_state' ).data( "_wssession", conn );
+__~debug:ws{          console.log('websocket opened');}
+          setInterval(function() {
+__~debug:ws{            console.log( "ping/pong keepalive" );}
+            if (ws.bufferedAmount == 0) {
+              ws.send("Keep alive from client"  ); }
+            }, 30000 );
         }
       , function() {            // When the connection is closed
 __~debug:ws{            console.warn('setMsging connection closed');}
@@ -731,6 +743,9 @@ ga.jc.url         = "ajax/sys_config/sys_jobs.php";
 
 ga.license.url    = "ajax/sys_config/sys_license.php";
 
+ga.captcha.url         = "ajax/sys_config/sys_captcha.php";
+ga.captcha.url_verify  = "ajax/sys_config/sys_captcha_verify.php";
+
 // var fs_test = function( obj ) {
 //   console.log( "fs_test:" );
 //   console.dir( obj );
@@ -783,4 +798,4 @@ __~docsbaseurl{<div id="tab_docs" class="help_link"><a href="__docsbaseurl__" ta
 <ul id="navul">
 <script>
 ga.tmp.menu = "";
-ga.admin.ids = [];
+ga.restricted.ids = {};

@@ -26,13 +26,19 @@ if ( !isset( $_REQUEST[ '_logon' ] ) ) {
 
 $appconfig = json_decode( file_get_contents( "__appconfig__" ) );
 
-if ( !isset( $appconfig->admin ) ) {
-    $results[ "error" ] = "appconfig.json no administrators defined";
+if ( !isset( $appconfig->restricted ) ) {
+    $results[ "error" ] = "appconfig.json no restrictions defined";
     echo (json_encode($results));
     exit();
 }    
 
-if ( !in_array( $_REQUEST[ '_logon' ], $appconfig->admin ) ) {
+if ( !isset( $appconfig->restricted->admin ) ) {
+    $results[ "error" ] = "appconfig.json no adminstrators defined";
+    echo (json_encode($results));
+    exit();
+}    
+
+if ( !in_array( $_REQUEST[ '_logon' ], $appconfig->restricted->admin ) ) {
     $results[ "error" ] = "not an administrator";
     echo (json_encode($results));
     exit();

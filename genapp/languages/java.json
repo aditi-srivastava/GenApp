@@ -13,14 +13,6 @@
                    }
                    ,{
                     "frequency"  : "once",
-                    "output"     : "compile___application__",
-                    "setexecutable" : "true",
-                    "inputs"     : [ 
-                                     { "compile.sh" : "once" }
-                                   ]
-                   }    
-                   ,{
-                    "frequency"  : "once",
                     "output"     : "run___application__",
                     "setexecutable" : "true",
                     "inputs"     : [ 
@@ -123,6 +115,15 @@
                                      ,{"airavata/footer.java"  : "once"}
                                    ]
                    }
+                   ,{
+                    "frequency"  : "once",
+                    "output"     : "compile___application__",
+                    "setexecutable" :"true",
+                    "execute"    : "true",
+                    "inputs"     : [ 
+                                     { "compile.sh" : "once" }
+                                   ]
+                   }    
        ]
 }
 

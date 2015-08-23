@@ -86,10 +86,10 @@ ga.license.get = function() {
                 if ( data[ 'license' ] ) {
                     ga.license.data = data[ 'license' ];
                 }
-                if ( data[ 'hasadmin' ] ) {
-                    $( ga.admin.ids.join() ).show();
+                if ( data[ 'restricted' ] ) {
+                    ga.restricted.show( data[ 'restricted' ] );
                 } else {
-                    $( ga.admin.ids.join() ).hide();
+                    ga.restricted.hideall();
                 }
                 __~debug:license{console.dir( data );}
             })
