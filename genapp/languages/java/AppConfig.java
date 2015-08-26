@@ -52,22 +52,7 @@ public class AppConfig {
         return properties;
     }
     
-    public static JSONObject getComputeResource(){
-        JSONObject computeResource = null;
-        JSONObject config = getAppConfig();
-        String resource = (String) config.get("resourcedefault");
-        if(resource.equals("airavata")){
-            JSONObject jsonResource = (JSONObject) config.get("resources");
-            if(jsonResource.containsKey(resource)){
-                JSONObject airavata = (JSONObject) jsonResource.get(resource);
-                JSONArray cmr = (JSONArray) airavata.get("resources");
-                computeResource = (JSONObject) cmr.get(0);
-            }
-        }
-        return computeResource;
-    }
-    
-    public static JSONArray getComputeResourceArray(){
+    public static JSONArray getComputeResources(){
         JSONArray computeResource = null;
         JSONObject config = getAppConfig();
         String resource = (String) config.get("resourcedefault");

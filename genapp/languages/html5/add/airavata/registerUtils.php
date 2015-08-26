@@ -58,11 +58,10 @@ use Airavata\Model\Workspace\Gateway;
 
 #airavata functions
 function register(){
-  getProperties(); 
-  // $airavataconfig = parse_ini_file("airavata-client-properties.ini");
   $gatewayId = $GLOBALS['AIRAVATA_GATEWAY'];
   $transport = new TSocket($GLOBALS['AIRAVATA_SERVER'], $GLOBALS['AIRAVATA_PORT']);
   $transport->setSendTimeout($GLOBALS['AIRAVATA_TIMEOUT']);
+  $transport->setRecvTimeout($GLOBALS['AIRAVATA_TIMEOUT']);
   $protocol = new TBinaryProtocol($transport);
   try{
         $transport->open();
@@ -74,29 +73,28 @@ function register(){
         $gateway->domain = $GLOBALS['AIRAVATA_SERVER'];
         $gateway->emailAddress = $GLOBALS['AIRAVATA_EMAIL'];;
         $airavataclient->addGateway($gateway);
-        $hostId = registerHost($airavataclient, $GLOBALS['AIRAVATA_SERVER']);
-        registerGateWayProfile($airavataclient, $hostId);
-        // echo var_dump($resourceprofile);
+        registerComputeResourceHost($airavataclient, $GLOBALS['COMPUTE_RESOURCE']);
         }else{
           if(isGatewayRegistered($airavataclient, $gatewayId)){
-                $cmrf = $airavataclient
-                            ->getGatewayResourceProfile($gatewayId)
-                            ->computeResourcePreferences;
-               $hostId = $cmrf[0]->computeResourceId;
+            $cmrf = $airavataclient
+                        ->getGatewayResourceProfile($gatewayId)
+                        ->computeResourcePreferences;
+            registerComputeResourceHost($airavataclient, getUnRegisteredHost($airavataclient, $cmrf));
           }else{
-            $hostId = registerHost($airavataclient, $GLOBALS['AIRAVATA_SERVER']);
-            registerGateWayProfile($airavataclient, $hostId);
+            registerComputeResourceHost($airavataclient, $GLOBALS['COMPUTE_RESOURCE']);
           }
         }
-       $registeredModules = getRegisteredModules($airavataclient, $gatewayId);
-       // echo var_dump($registeredModules);
-       $modules = getUnregisteredModules($registeredModules);
-        if(!empty($modules)){
-           $moduleids = registerApplicationModule($gatewayId, $airavataclient, $modules);
-           registerApplicationDeployments($gatewayId, $airavataclient, $moduleids, $modules, $hostId);
-           registerApplicationInterfaces($gatewayId, $airavataclient, $moduleids, $modules, $hostId);
-    }
-       $transport->close();
+        $hostIds = getHostIds($airavataclient, $gatewayId);
+        $registeredModules = getRegisteredModules($airavataclient, $gatewayId);
+        $modulesHost = getUnregisteredModules($airavataclient, $registeredModules);
+        foreach ($modulesHost as $hostName => $modules) {
+          if(!empty($modules)){
+             $moduleids = registerApplicationModule($gatewayId, $airavataclient, $modules);
+             registerApplicationDeployments($gatewayId, $airavataclient, $moduleids, $modules, $hostIds[$hostName]);
+             registerApplicationInterfaces($gatewayId, $airavataclient, $moduleids, $modules, $hostName);
+          }
+        }
+        $transport->close();
   } 
     catch (InvalidRequestException $ire)
     {
@@ -131,8 +129,55 @@ function isGatewayRegistered($client, $gatewayId){
    return $exist;
 }
 
+
+function getRegisteredModules($client, $gatewayId){
+  return $client->getAllApplicationInterfaceNames($gatewayId);    
+}
+
+function getUnregisteredModules($client,$registeredModules){
+  $unregisteredModules = array();
+  $unregisteredModulesForHost = array();
+  $modules = getModulesNames();
+  foreach ($GLOBALS['COMPUTE_RESOURCE'] as $resource) {
+      $unregisteredModules[$resource->host] =  array();
+  }
+  foreach ($modules as $index => $id) {
+      foreach ($GLOBALS['COMPUTE_RESOURCE'] as $resource) {
+        $name = $id."_".$resource->host;
+        $unregisteredModules[$resource->host][] = $id ;     
+        if(isset($registeredModules[$name])){
+            foreach ($client->getAvailableAppInterfaceComputeResources($name) as $hostId => $hostName) {
+              if($hostName == $resource->host){
+                  echo $name." is already registered for $hostName \n";
+                  unset($unregisteredModules[$hostName][$index]);  
+              }
+            }
+        }
+      }
+  }
+  return $unregisteredModules;
+}
+
+function registerHost($client, $resource){
+    $resourceDesc = createComputeResourceDescription($resource->host, $resource->description, null, null);
+    $hostId = $client->registerComputeResource($resourceDesc);
+    $resourceJobManager = createResourceJobManager(ResourceJobManagerType::FORK, null, null, null);
+    $submission = new LOCALSubmission();
+    $submission->resourceJobManager = $resourceJobManager;
+    $localSubmission = $client->addLocalSubmissionDetails($hostId,1,$submission);
+    echo "registered ".$localSubmission."\n";
+    return $hostId;
+}
+
+function registerComputeResourceHost($client, $host){
+    foreach ($host as $key => $resourceHost) {
+        echo "## Registering for $resourceHost->host ##\n";
+        $id = registerHost($client, $resourceHost);
+        registerGateWayProfile($client, $id);
+    }
+}
+
 function registerGateWayProfile($client, $hostId){
-   // $airavataconfig = parse_ini_file("airavata-client-properties.ini");
    $gatewayId = $GLOBALS['AIRAVATA_GATEWAY'];
    $user = $GLOBALS['AIRAVATA_LOGIN'];
    $resourcePreference = new ComputeResourcePreference();
@@ -148,44 +193,57 @@ function registerGateWayProfile($client, $hostId){
    $client->registerGatewayResourceProfile($gatewayProfile);
 }
 
-function getRegisteredModules($client, $gatewayId){
- //    $registeredModules = array();    
-  // $allDeployed = $client->getAllApplicationDeployments();
-  //  foreach ($allDeployed as $module) {
-  //      $registeredModules[$client->getApplicationModule($module->appModuleId)->appModuleName] = $module->executablePath;
-  //  }
-  return $client->getAllApplicationInterfaceNames($gatewayId);    
-}
-
-function getUnregisteredModules($registeredModules){
-  $unregisteredModules = array();
-  $exec_path = getExecutablePath();
-  $modules = getModulesNames();
-  foreach ($modules as $id) {
-    if(isset($registeredModules[$id])){
-      if(strcmp($registeredModules[$id], $id) == 0){
-                echo $id." is already registered \n";
-      }else {
-        $unregisteredModules[] = $id;
-      }
-    }else{
-      $unregisteredModules[] = $id;
+function getUnRegisteredHost($client, $cmrf){
+  $resources = $client->getAllComputeResourceNames();
+  $host = array();
+  foreach ($GLOBALS["COMPUTE_RESOURCE"] as $cmr) {
+    $exist = 0;
+    foreach ($resources as $key => $value) {
+       if($value == $cmr->host){
+          foreach ($cmrf as $index => $cmrfResource) {
+             if($cmrfResource->computeResourceId == $key){
+                unset($resources[$key]);
+                unset($cmrf[$index]);
+                $exist = 1; 
+             }
+          }
+       }
     }
+       if($exist == 0){
+          $host[] = $cmr;
+       }
   }
-  return $unregisteredModules;
+    return $host;
 }
 
-function registerHost($client, $host){
-  echo "## Registering for host ##\n";
-    $resourceDesc = createComputeResourceDescription($host, "Host for GenApp", null, null);
-    $hostId = $client->registerComputeResource($resourceDesc);
-    $resourceJobManager = createResourceJobManager(ResourceJobManagerType::FORK, null, null, null);
-    $submission = new LOCALSubmission();
-    $submission->resourceJobManager = $resourceJobManager;
-    $localSubmission = $client->addLocalSubmissionDetails($hostId,1,$submission);
-    echo "registered ".$localSubmission."\n";
-    return $hostId;
-    // echo var_dump(ResourceJobManagerType::FORK);
+function getHostIds($client, $gatewayId) {
+    $cmrf = $client->getGatewayResourceProfile($gatewayId)->computeResourcePreferences;
+    $resources = $client->getAllComputeResourceNames();
+    $tempIds = array();
+    $tempDetails = array();
+    $executable = array();
+    $hostIds = array();
+
+    foreach ($cmrf as $cmrfResource) {
+        $tempIds[] = $cmrfResource->computeResourceId;
+    }
+
+    foreach ($GLOBALS['COMPUTE_RESOURCE'] as $resource) {
+        $executable[$resource->host] = $resource->executable;
+    }
+
+    foreach ($resources as $hostId => $hostName) {
+       $tempDetails[$hostId] = $hostName;
+    }
+
+    foreach ($tempIds as $id) {
+      if(isset($tempDetails[$id])){
+         $hostIds[$tempDetails[$id]] = array(
+                  'id' => $id,
+                  'executable' => $executable[$tempDetails[$id]]);
+      }
+    }
+    return $hostIds;
 }
 
 function createComputeResourceDescription($hostName, $hostDesc, $hostAliases, $ipAddresses) {
@@ -224,12 +282,12 @@ function createApplicationModule($appModuleName, $appModuleVersion, $appModuleDe
         return $module;
 }
 
-function registerApplicationDeployments($gatewayId, $client, $moduleIds, $moduleNames, $hostId){
+function registerApplicationDeployments($gatewayId, $client, $moduleIds, $moduleNames, $host){
         echo "#### Registering Application Deployments on Localhost ####\n";
         foreach ($moduleNames as $name) {
             $deployId = $client->registerApplicationDeployment($gatewayId, 
-                createApplicationDeployment($moduleIds[$name], $hostId,
-                    getExecutablePath()."/".$name, ApplicationParallelismType::SERIAL, 
+                createApplicationDeployment($moduleIds[$name], $host["id"],
+                    $host["executable"]."/".$name, ApplicationParallelismType::SERIAL, 
                     $name+" application description"));
             echo "Successfully registered ".$name." application on localhost, application Id = ".$deployId."\n";
         }
@@ -247,7 +305,7 @@ function createApplicationDeployment($appModuleId, $computeResourceId, $executab
         return $deployment;
     }
 
-function registerApplicationInterfaces($gatewayId, $client, $moduleIds, $moduleNames, $hostId) {
+function registerApplicationInterfaces($gatewayId, $client, $moduleIds, $moduleNames, $hostName) {
     foreach ($moduleNames as $module) {
         echo "#### Registering ".$module." Interface ####\n";
         $appModules = array();
@@ -264,7 +322,7 @@ function registerApplicationInterfaces($gatewayId, $client, $moduleIds, $moduleN
         $applicationOutputs[] = $output;
 
         $InterfaceId = $client->registerApplicationInterface($gatewayId, 
-                 createApplicationInterfaceDescription($module , $module." application description",
+                 createApplicationInterfaceDescription($module."_".$hostName , $module." application description",
                         $appModules, $applicationInputs, $applicationOutputs));
         echo $module." Application Interface Id ".$InterfaceId."\n";
 

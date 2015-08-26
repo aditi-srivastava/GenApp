@@ -1,6 +1,4 @@
 <?php
-
-function getProperties(){
   $appjson = json_decode( file_get_contents( "__appconfig__" ) );
   $properties = $appjson->resources->airavata->properties;
   $GLOBALS["AIRAVATA_GATEWAY"] = $properties->gateway;
@@ -12,8 +10,5 @@ function getProperties(){
   $GLOBALS["AIRAVATA_LOGIN"] = $properties->login;
   $GLOBALS["AIRAVATA_PROJECT_ACCOUNT"] = $properties->projectAccount;
   $GLOBALS["AIRAVATA_CREDENTIAL_STORE_TOKEN"] = $properties->credentialStoreToken;
-  $GLOBALS["COMPUTE_RESOURCE_HOST"] = $appjson->resources->airavata->resources[0]->host;
-
-}
-
+  $GLOBALS["COMPUTE_RESOURCE"] = $appjson->resources->airavata->resources;
 ?>

@@ -3,6 +3,7 @@ package airavata;
 import org.apache.airavata.model.error.AiravataClientConnectException;
 import org.apache.thrift.TException;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
 
 public class LaunchExperiment {
     public static void main(String[] args) {
@@ -25,6 +26,9 @@ public class LaunchExperiment {
                 System.out.println(error);
             }
             catch (InterruptedException e) {
+                error.put("error", e.getMessage());
+                System.out.println(error);
+            } catch (ParseException e) {
                 error.put("error", e.getMessage());
                 System.out.println(error);
             }

@@ -50,8 +50,6 @@ use Airavata\Model\AppCatalog\AppInterface\DataType;
 
 
 function createProject($projectName){
-    getProperties(); 
-    // $airavataconfig = parse_ini_file("airavata-0.15/airavata-client-properties.ini");
     $transport = new TSocket($GLOBALS['AIRAVATA_SERVER'], $GLOBALS['AIRAVATA_PORT']);
     $transport->setRecvTimeout($GLOBALS['AIRAVATA_TIMEOUT']);
     $transport->setSendTimeout($GLOBALS['AIRAVATA_TIMEOUT']);
@@ -104,10 +102,6 @@ function createProject($projectName){
 }
 
 function createExperiment($expName, $projId, $appId, $inp){
-    // if(!isset($GLOBALS['AIRAVATA_SERVER']){
-        getProperties();
-    // }
-    // $airavataconfig = parse_ini_file("airavata-0.15/airavata-client-properties.ini");
     $transport = new TSocket($GLOBALS['AIRAVATA_SERVER'], $GLOBALS['AIRAVATA_PORT']);
     $transport->setRecvTimeout($GLOBALS['AIRAVATA_TIMEOUT']);
     $transport->setSendTimeout($GLOBALS['AIRAVATA_TIMEOUT']);
@@ -135,7 +129,9 @@ function createExperiment($expName, $projId, $appId, $inp){
         /* Create Experiment: needs to update using unique project ID. */
         $user = $GLOBALS['AIRAVATA_LOGIN'];
         $host = $GLOBALS['AIRAVATA_SERVER'];
-        $cmrHost = $GLOBALS["COMPUTE_RESOURCE_HOST"];
+        $cmrHost = getRandomResource();
+        $GLOBALS["RESOURCE_HOST"] = $cmrHost->host;
+        $appId.="_".$GLOBALS["RESOURCE_HOST"];
         // $hostname = $airavataconfig['AIRAVATA_SERVER_ALIAS'];
         $gatewayId = $GLOBALS['AIRAVATA_GATEWAY'];
         $proAccount = $GLOBALS['AIRAVATA_PROJECT_ACCOUNT'];
@@ -152,7 +148,7 @@ function createExperiment($expName, $projId, $appId, $inp){
         $computeResources = $airavataclient->getAvailableAppInterfaceComputeResources($appId);
         if(isset($computeResources) && !empty($computeResources)){
             foreach ($computeResources as $key => $value) {
-                if($value == $cmrHost){
+                if($value == $cmrHost->host){
                     $cmRST = new ComputationalResourceScheduling();
                     $cmRST->resourceHostId = $key;
                     $cmRST->computationalProjectAccount = $proAccount;
@@ -208,10 +204,6 @@ function createExperiment($expName, $projId, $appId, $inp){
 }
 
 function launchExperiment( $expId){
-    // $airavataconfig = parse_ini_file("airavata-0.15/airavata-client-properties.ini");
-    if(!isset($GLOBALS['AIRAVATA_SERVER'])){
-        getProperties();
-    }
     $token = $GLOBALS['AIRAVATA_CREDENTIAL_STORE_TOKEN'];
     $transport = new TSocket($GLOBALS['AIRAVATA_SERVER'], $GLOBALS['AIRAVATA_PORT']);
     $transport->setSendTimeout($GLOBALS['AIRAVATA_TIMEOUT']);
@@ -251,10 +243,6 @@ function launchExperiment( $expId){
 
 function getOutput( $expId)
 {
-    if(!isset($GLOBALS['AIRAVATA_SERVER'])){
-        getProperties();
-    }
-    // $airavataconfig = parse_ini_file("airavata/airavata-client-properties.ini");
     $transport = new TSocket($GLOBALS['AIRAVATA_SERVER'], $GLOBALS['AIRAVATA_PORT']);
     $transport->setSendTimeout($GLOBALS['AIRAVATA_TIMEOUT']);
     $protocol = new TBinaryProtocol($transport);
@@ -279,7 +267,9 @@ function getOutput( $expId)
         $transport->close();
         $outputData = array();
         if(!empty($outputs[0]->value)){
-            $outputData["output"] = $outputs[0]->value;
+            $out = json_decode($outputs[0]->value);
+            $out->Computational_Host = $GLOBALS["RESOURCE_HOST"]; 
+            $outputData["output"] = json_encode($out);
         }else {
             $outputData["error"] = $outputs[1]->value;
         }
@@ -357,6 +347,12 @@ function get_experiment_status($client, $expId)
         }
         return json_encode($outputData);
 
+}
+
+function getRandomResource(){
+    $resources = $GLOBALS["COMPUTE_RESOURCE"];
+    $size = sizeof($resources);
+    return $resources[rand(0, $size-1)];
 }
 
 ?>

@@ -1,11 +1,11 @@
 package airavata;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 
 import org.apache.airavata.api.Airavata;
 import org.apache.airavata.api.client.AiravataClientFactory;
@@ -24,6 +24,8 @@ import org.apache.airavata.model.workspace.experiment.UserConfigurationData;
 import org.apache.thrift.TException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import util.AppConfig;
 
@@ -35,6 +37,7 @@ public class ExperimentUtils {
     private String TOKEN;
     private String PROJECT_ACCOUNT_NAME;
     private Airavata.Client airavataClient;
+    private String RESOURCE_HOST;
     
     public ExperimentUtils() throws AiravataClientConnectException{
         init();
@@ -68,19 +71,19 @@ public class ExperimentUtils {
        input.setType(DataType.STRING);
        input.setValue(inputJson);
        exInputs.add(input);
-
        List<OutputDataObjectType> exOut = new ArrayList<OutputDataObjectType>();
        OutputDataObjectType output = new OutputDataObjectType();
        output.setName("output_json");
        output.setType(DataType.STDOUT);
        output.setValue("");
        exOut.add(output);
-       
+       JSONObject cmrs = getRandomResource();
+       RESOURCE_HOST = (String) cmrs.get("host");
+       appId+="_"+RESOURCE_HOST;
        Experiment genAppExperiment =
                ExperimentModelUtil.createSimpleExperiment(projectId, OWNER, expName, "GenApp Module Experiment", appId, exInputs);
        genAppExperiment.setExperimentOutputs(exOut);
        Map<String, String> cmrf = airavataClient.getAvailableAppInterfaceComputeResources(appId);
-       JSONObject cmrs = AppConfig.getComputeResource();
            String host = (String) cmrs.get("host");
            String hostId = getKeyFromValue(cmrf, host);
            if(cmrf.containsValue(host)){
@@ -101,7 +104,7 @@ public class ExperimentUtils {
        airavataClient.launchExperiment(expId, "");
    }
    
-   public String getOutput(String expId) throws TException, InterruptedException{
+   public String getOutput(String expId) throws TException, InterruptedException, ParseException{
        ExperimentState state = null;
        int waitTime = 1;
        while(!(state = getExperimentState(expId)).equals(ExperimentState.COMPLETED)){
@@ -114,7 +117,10 @@ public class ExperimentUtils {
            Thread.sleep(waitTime);
            waitTime++;
        }
-       return airavataClient.getExperimentOutputs(expId).get(0).getValue();
+       JSONParser parser = new JSONParser();
+       JSONObject out = (JSONObject) parser.parse(airavataClient.getExperimentOutputs(expId).get(0).getValue());
+       out.put("Computational_Host", RESOURCE_HOST);
+       return out.toJSONString();
    }
    
    public ExperimentState getExperimentState(String expId) throws TException{
@@ -133,6 +139,13 @@ public class ExperimentUtils {
            }
        }
        return key;
+   }
+   
+   private JSONObject getRandomResource(){
+       JSONArray cmrs = AppConfig.getComputeResources();
+       Random rn = new Random();
+       int no = Math.abs(rn.nextInt())%cmrs.size();
+       return (JSONObject)cmrs.get(Math.abs(no));
    }
 
 }
