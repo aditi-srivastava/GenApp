@@ -31,10 +31,14 @@
                     "frequency"  : "once",
                     "output"     : "__application__.java",
                     "inputs"     : [ 
-                                     { "imports.java" : "menu:modules:id" }
-                                     ,{ "Genapp.java" : "once" }
-                                     ,{ "AddCaseModules.java" : "menu:modules:id" }
-                                     ,{ "Footer.java" : "once" }
+                                     { "main/imports.java" : "menu:modules:id" }
+                                     ,{ "main/header1.java" : "once" }
+                                     ,{ "main/header2.java" : "menu:id" }
+                                     ,{ "main/header3.java" : "once" }
+                                     ,{ "main/header4.java" : "menu:id" }
+                                     ,{ "main/header5.java" : "once" }
+                                     ,{ "main/AddCaseModules.java" : "menu:modules:id" }
+                                     ,{ "main/Footer.java" : "once" }
                                    ]
                    }
                    ,{
